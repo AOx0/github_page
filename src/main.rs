@@ -19,7 +19,7 @@ fn Footer(cx: Scope) -> impl IntoView {
         <footer id="footer" class="text-black dark:text-gray-100">
             <div class="container flex flex-col-reverse justify-between px-6 py-10 mx-auto space-y-8 md:space-y-0">
                 <div class="text-xs block text-center">
-                    "Copyright © 2023, All rights reserved<br>Made by AOx0 with Leptos SSR &amp; TailwindCSS"
+                    "Copyright © 2023, All rights reserved<br>Made by AOx0 with Leptos SSR, AlpineJS &amp; TailwindCSS"
                 </div>
             </div>
         </footer>
@@ -200,8 +200,31 @@ fn NavBar(cx: Scope) -> impl IntoView {
 }
 
 #[component]
+fn Welcome(cx: Scope) -> impl IntoView {
+    view! {cx,
+        <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+            <h1 class="text-4xl md:text-5xl font-bold py-10 ">
+                "About Me"
+            </h1>
+            <p class="text-justify">
+                "
+                    Hi 👋,<br><br>I'm Alejandro Osornio, an enthusiastic programmer who really enjoys compiled
+                    languages, playing around with interpreted ones, and creating side projects of all kinds for
+                    fun.<br><br>I am interested in Cyber-security, computer science, math, and Backend, enjoy writing
+                    Frontend, and like writing CLI tools to make my day-to-day easier.<br><br>Currently, I'm studying
+                    Data Intelligence and Cyber-security at Panamerican University.<br><br>This web page is my blog,
+                    portfolio, and how to contact. Feel free to explore around and to contact me.
+                "
+            </p>
+
+        </div>
+    }
+}
+
+#[component]
 fn BaseHtml(
     cx: Scope,
+    title: &'static str,
     #[prop(optional)] x_data: &'static str,
     #[prop(optional)] katex: bool,
     #[prop(optional)] alpine: bool,
@@ -211,6 +234,8 @@ fn BaseHtml(
         <html class="dark">
             <head>
                 <meta id="t_color" name="theme-color" content="rgb(31 41 55 / var(--tw-bg-opacity))"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                <title>{title}</title>
                 <meta charset="UTF-8"/>
                 <link rel="stylesheet" href="/static/styles.css"/>
                 {(alpine || x_data != "").then(|| view!{cx, <script src=r"https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer init />})}
@@ -250,7 +275,7 @@ fn BaseHtml(
                 x-data=x_data
                 class="flex flex-col h-screen bg-white dark:bg-gray-800 text-black dark:text-gray-100"
             >
-            {children(cx)}
+            <div class="flex-auto">{children(cx)}</div>
             </body>
             <Footer/>
         </html>
@@ -260,8 +285,8 @@ fn BaseHtml(
 #[component]
 fn Home(cx: Scope) -> impl IntoView {
     view! { cx,
-        <BaseHtml alpine=true>
-            <></>
+        <BaseHtml title="AOx0">
+            <Welcome/>
         </BaseHtml>
     }
 }
