@@ -117,7 +117,7 @@ fn Github(cx: Scope) -> impl IntoView {
 #[component]
 pub fn ItemsCollection(cx: Scope) -> impl IntoView {
     view! { cx,
-        <MenuItem href="/home">"Home"</MenuItem>
+        <MenuItem href="/">"Home"</MenuItem>
         // <MenuItem href="/portfolio">"Portfolio"</MenuItem>
         <MenuItem href="/blog">"Blog"</MenuItem>
         // <MenuItem href="/resume">"Resume"</MenuItem>
@@ -200,28 +200,6 @@ fn NavBar(cx: Scope) -> impl IntoView {
 }
 
 #[component]
-fn Welcome(cx: Scope) -> impl IntoView {
-    view! {cx,
-        <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
-            <h1 class="text-4xl md:text-5xl font-bold py-10 ">
-                "About Me"
-            </h1>
-            <p class="text-justify">
-                "
-                    Hi 👋,<br><br>I'm Alejandro Osornio, an enthusiastic programmer who really enjoys compiled
-                    languages, playing around with interpreted ones, and creating side projects of all kinds for
-                    fun.<br><br>I am interested in Cyber-security, computer science, math, and Backend, enjoy writing
-                    Frontend, and like writing CLI tools to make my day-to-day easier.<br><br>Currently, I'm studying
-                    Data Intelligence and Cyber-security at Panamerican University.<br><br>This web page is my blog,
-                    portfolio, and how to contact. Feel free to explore around and to contact me.
-                "
-            </p>
-
-        </div>
-    }
-}
-
-#[component]
 fn BaseHtml(
     cx: Scope,
     title: &'static str,
@@ -283,12 +261,250 @@ fn BaseHtml(
 }
 
 #[component]
+pub fn Link(
+    cx: Scope,
+    #[prop(optional)] more: &'static str,
+    href: &'static str,
+    children: Box<dyn Fn(Scope) -> Fragment>,
+) -> impl IntoView {
+    view! { cx,
+        <a class=format!("font-bold hover:text-orange-500 {more}") href=href>
+            {children(cx)}
+        </a>
+    }
+}
+
+#[component]
+fn H1(
+    cx: Scope,
+    #[prop(optional)] more: &'static str,
+    children: Box<dyn Fn(Scope) -> Fragment>,
+) -> impl IntoView {
+    view! { cx,
+        <h1 class=format!("text-4xl md:text-5xl font-bold py-10 {more}")>{children(cx)}</h1>
+    }
+}
+
+#[component]
+fn H2(
+    cx: Scope,
+    #[prop(optional)] more: &'static str,
+    children: Box<dyn Fn(Scope) -> Fragment>,
+) -> impl IntoView {
+    view! { cx,
+        <h1 class=format!("text-3xl md:text-4xl font-semibold py-5 {more}")>{children(cx)}</h1>
+    }
+}
+
+#[component]
+fn H5(
+    cx: Scope,
+    #[prop(optional)] more: &'static str,
+    children: Box<dyn Fn(Scope) -> Fragment>,
+) -> impl IntoView {
+    view! { cx,
+        <h1 class=format!("text-xl font-semibold pb-5 pt-1 {more}")>{children(cx)}</h1>
+    }
+}
+
+#[component]
+fn Caption(cx: Scope, msg: &'static str) -> impl IntoView {
+    view! { cx,
+        <p class="text-sm font-light block text-center pt-1">
+            {msg} <br/>
+        </p>
+    }
+}
+
+#[component]
+fn Image(cx: Scope, src: &'static str, caption: &'static str) -> impl IntoView {
+    view! { cx,
+        <div style="border-radius: 3pt;" class="bg-white">
+            <img class="p-3" src=src/>
+        </div>
+        <Caption msg=caption/>
+
+    }
+}
+
+#[component]
+fn P(cx: Scope, children: Box<dyn Fn(Scope) -> Fragment>) -> impl IntoView {
+    view! { cx,
+        <p class="text-justify">{children(cx)}</p>
+    }
+}
+
+#[component]
+pub fn Tag(cx: Scope, name: &'static str, tag: &'static str) -> impl IntoView {
+    view! { cx,
+        <div class="relative pr-0.5">
+            <button id=tag class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-900/30 dark:text-gray-400 dark:shadow-highlight/4" type="button">
+                {name}
+            </button>
+        </div>
+    }
+}
+
+#[component]
+pub fn BlogEntryNutshell(
+    cx: Scope,
+    href: &'static str,
+    title: &'static str,
+    des: &'static str,
+) -> impl IntoView {
+    let tags = &[("C++", "cpp"), ("ML", "machine-learning"), ("Rust", "rust")];
+    view! { cx,
+        <div class="flex flex-col">
+            <div class="flex">
+                { tags.into_iter().map(|(name, tag)| view! {cx, <Tag name=name tag=tag/>}).collect::<Vec<_>>() }
+            </div>
+            <a href=href>
+                <div class="flex justify-between items-center flex-row-revert">
+                    <H5 more="hover:text-orange-500 text-left">{title}</H5>
+                    <p class="font-thin">"2022-10-11"</p>
+                </div>
+            </a>
+            <a href=href>
+                <p class="text-justify">{des}</p>
+            </a>
+        </div>
+    }
+}
+
+#[component]
+fn Blog(cx: Scope) -> impl IntoView {
+    view! { cx,
+        <BaseHtml title="Blog - AOx0">
+            <div class="relative max-w-screen-md container text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                <div class="lg:text-sm lg:leading-6 relative">
+                <div class="sticky pointer-events-none">
+                        <div class="relative pointer-events-auto">
+                            <div
+                                class=
+                                    "p-0 w-full flex items-center text-sm leading-6 text-gray-400 rounded-md ring-1 ring-gray-900/10
+                                    shadow-sm py-1.5 pl-2 pr-3 hover:ring-gray-300 dark:bg-gray-900/30 dark:highlight-white/5 dark:hover:bg-gray-800"
+                            >
+                                <svg width="24" height="24" fill="none" aria-hidden="true" class="mr-3 flex-none"><path d="m19 19-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></svg>
+                                <input class="h-full grow !border-none !focus:ring-0 !outline-none relative bg-transparent" type="text" placeholder="Quick search..."/>
+                            </div>
+                        </div>
+                </div>
+                </div>
+                <div class="flex flex-col space-y-10 md:space-y-0">
+                    <H1>"Blog"</H1>
+                </div>
+                <div class="flex flex-col space-y-10 md:space-y-0">
+                    <BlogEntryNutshell href="#" title="Type guidance on APIs using PhantomData"
+                        des="When writing APIs it's easy for users to make
+                        misuses of methods defined within a struct. There are 
+                        cases when you might want to restrict the methods available 
+                        downstream depending on the state of an instance. In this writeup I 
+                        talk about Rust's PhantomData and how to use it to design unbreakable APIs."
+                    />
+                    <BlogEntryNutshell href="#" title="Data analysis exercise: COVID19 in México"
+                        des="COVID-19 reached every place on the earth.
+                        An examination of open data from México will reveal the situation there. 
+                        This paper aims to describe it by showing plenty of plots and graphs, 
+                        explaining how to develop them in the process.<br/><br/>The purpose, 
+                        to strengthen my general analysis skills, practicing methods used to produce 
+                        high-quality media."
+                    />
+                </div>
+            </div>
+        </BaseHtml>
+    }
+}
+
+#[component]
+fn Welcome(cx: Scope) -> impl IntoView {
+    view! {cx,
+        <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+            <h1 class="text-4xl md:text-5xl font-bold py-10 ">
+                "About Me"
+            </h1>
+            <p class="text-justify">
+                "
+                    Hi 👋,<br><br>I'm Alejandro Osornio, an enthusiastic programmer who really enjoys compiled
+                    languages, playing around with interpreted ones, and creating side projects of all kinds for
+                    fun.<br><br>I am interested in Cyber-security, computer science, math, and Backend, enjoy writing
+                    Frontend, and like writing CLI tools to make my day-to-day easier.<br><br>Currently, I'm studying
+                    Data Intelligence and Cyber-security at Panamerican University.<br><br>This web page is my blog,
+                    portfolio, and how to contact. Feel free to explore around and to contact me.
+                "
+            </p>
+
+        </div>
+    }
+}
+
+#[component]
+fn Contact(cx: Scope) -> impl IntoView {
+    view! { cx,
+        <BaseHtml title="Contact - AOx0">
+            <div class="max-w-screen-md relative container text-left justify-left md:text-left
+                v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                <H1>"Where to find me"</H1>
+                <p>"Feel free to reach me out in any of the following places:"</p>
+                <ul class="list-disc list-inside pt-10">
+                    <ContactItem title="Email" href="mailto:aoxo.contact@gmail.com">
+                        "aoxo.contact@gmail.com"
+                    </ContactItem>
+                    <ContactItem title="Github" href="https://github.com/AOx0">
+                        "@AOx0"
+                    </ContactItem>
+                    <ContactItem title="Twitter" href="https://twitter.com/AlecsOsornio">
+                        "@AlecsOsornio"
+                    </ContactItem>
+                    <ContactItem title="LinkedIn" href="https://www.linkedin.com/in/aox0">
+                        "Alejandro Osornio"
+                    </ContactItem>
+                    <ContactItem title="Telegram" href="https://t.me/alecz">
+                        "@Alecz"
+                    </ContactItem>
+                    <ContactItem title="Instagram" href="https://www.instagram.com/ale.osornio/">
+                        "ale.osornio"
+                    </ContactItem>
+                </ul>
+                <p class="text-sm pt-5">
+                    "* I'm most active on Telegram, though."
+                </p>
+            </div>
+        </BaseHtml>
+    }
+}
+
+#[component]
+fn ContactItem(
+    cx: Scope,
+    title: &'static str,
+    href: &'static str,
+    children: Box<dyn Fn(Scope) -> Fragment>,
+) -> impl IntoView {
+    view! {cx,
+        <li>
+            <>{format!("{title}: ")}</>
+            <Link href=href>
+                {children(cx)}
+            </Link>
+        </li>
+    }
+}
+
+#[component]
 fn Home(cx: Scope) -> impl IntoView {
     view! { cx,
         <BaseHtml title="AOx0">
             <Welcome/>
         </BaseHtml>
     }
+}
+
+async fn show_contact() -> Html<String> {
+    Html(render_to_string(|cx| view! {cx, <Contact /> }))
+}
+
+async fn show_blog() -> Html<String> {
+    Html(render_to_string(|cx| view! {cx, <Blog /> }))
 }
 
 async fn say_hello() -> Html<String> {
@@ -308,6 +524,8 @@ async fn main() -> Result<()> {
             get(|| async { Redirect::permanent("/static/favicon.ico") }),
         )
         .route("/", get(say_hello))
+        .route("/contact", get(show_contact))
+        .route("/blog", get(show_blog))
         .nest_service("/static/", static_service);
 
     Ok(Server::bind(&"0.0.0.0:8000".parse()?)
