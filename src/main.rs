@@ -23,7 +23,16 @@ fn Footer(cx: Scope) -> impl IntoView {
         <footer id="footer" class="text-black dark:text-gray-100">
             <div class="container flex flex-col-reverse justify-between px-6 py-10 mx-auto space-y-8 md:space-y-0">
                 <div class="text-xs block text-center">
-                    "Copyright © 2023, All rights reserved<br>Made by AOx0 with Leptos SSR, AlpineJS &amp; TailwindCSS"
+                    "Copyright © 2023 Alejandro Osornio (AOx0). All rights reserved."
+                    <br/>
+                    "Made by AOx0 with "
+                    <a href="https://github.com/gbj/leptos" class="underline">"Leptos"</a>
+                    ", "
+                    <a href="https://github.com/alpinejs/alpine" class="underline">"AlpineJS"</a>
+                    " &amp; "
+                    <a href="https://github.com/tailwindlabs/tailwindcss" class="underline">"TailwindCSS"</a>
+                    ". "
+                    <a href="/terms/" class="underline">"Terms"</a>
                 </div>
             </div>
         </footer>
@@ -296,7 +305,18 @@ fn H2(
     children: Box<dyn Fn(Scope) -> Fragment>,
 ) -> impl IntoView {
     view! { cx,
-        <h1 class=format!("text-3xl md:text-4xl font-semibold py-5 {more}")>{children(cx)}</h1>
+        <h2 class=format!("text-3xl md:text-4xl font-semibold py-5 {more}")>{children(cx)}</h2>
+    }
+}
+
+#[component]
+fn H3(
+    cx: Scope,
+    #[prop(optional)] more: &'static str,
+    children: Box<dyn Fn(Scope) -> Fragment>,
+) -> impl IntoView {
+    view! { cx,
+        <h3 class=format!("text-1xl md:text-2xl font-semibold py-4 {more}")>{children(cx)}</h3>
     }
 }
 
@@ -307,7 +327,7 @@ fn H5(
     children: Box<dyn Fn(Scope) -> Fragment>,
 ) -> impl IntoView {
     view! { cx,
-        <h1 class=format!("text-xl font-semibold pb-5 pt-1 {more}")>{children(cx)}</h1>
+        <h5 class=format!("text-xl font-semibold pb-5 pt-1 {more}")>{children(cx)}</h5>
     }
 }
 
@@ -502,6 +522,89 @@ fn Welcome(cx: Scope) -> impl IntoView {
 }
 
 #[component]
+fn Terms(cx: Scope) -> impl IntoView {
+    view! {cx,
+        <BaseHtml title="Terms - AOx0">
+            <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                <H1>"Terms of Service"</H1>
+                <p class="text-justify">
+                    r#"
+                        This website is a personal portfolio owned and operated by Alejandro Osornio (the "Owner").
+                        By accessing or using this website, you agree to be bound by these terms of service (these "Terms"). 
+                        If you do not agree to these Terms, you may not access or use this website.
+                    "#
+
+                    <H3>"1. License to Use Website"</H3>
+                    r#"
+                        Subject to your compliance with these Terms, the Owner grants you a limited, non-exclusive, non-transferable, 
+                        revocable license to access and use this website for your personal, non-commercial use only. 
+                        This license does not include the right to: (a) sell, resell, or exploit for any commercial purposes, 
+                        any portion of this website or access to this website; (b) use any data mining, robots, or similar data 
+                        gathering or extraction methods; (c) download (other than the page caching) any portion of this website, 
+                        except as expressly permitted on this website; or (d) use this website other than for its intended purpose.
+                    "#
+
+                    <H3>"2. Open-Source Software"</H3>
+                    r#"
+                        This website includes the following open-source software, which is distributed under the specified licenses:
+                    "#
+                    r#"
+                        By using this website, you agree to be bound by the terms of the applicable open-source software licenses.
+                        You must include a copy of the applicable open-source software licenses and retain the copyright notice in any 
+                        copies of the open-source software that you distribute. You must also provide appropriate attribution to the original 
+                        authors of the open-source software as required by the terms of the applicable open-source software licenses.
+                    "#
+
+                    <H3>"3. Cookie Policy"</H3>
+                    r#"
+                        This website uses cookies to improve the user experience. These cookies do not collect any personal information or track your browsing activity. They are used solely for the purpose of providing a better user experience on this website. By using this website, you consent to the use of cookies.
+                    "#
+
+                    <H3>"4. Intellectual Property"</H3>
+                    r#"
+                        This website and all content, services, and products available on or through this website, including, but not limited 
+                        to, text, graphics, logos, images, and software, are the property of the Owner or its licensors.
+                        You may not use any content, services, or products on this website for any commercial 
+                        purpose without the express written consent of the Owner. For non-commercial use, you must give appropriate credit 
+                        to the Owner and include a link to this website.
+                    "#
+
+                    <H3>"5. User Conduct"</H3>
+                    r#"
+                        You agree to use this website only for lawful purposes and in a way that does not infringe the rights of, restrict, 
+                        or inhibit anyone else's use and enjoyment of this website. You may not use this website in any manner that could 
+                        damage, disable, overburden, or impair this website or interfere with any other party's use and enjoyment of this website.
+                    "#
+
+                    <H3>"6. Disclaimer of Warranties"</H3>
+                    r#"
+                        This website is provided on an "as is" and "as available" basis. The Owner makes no representations or warranties of 
+                        any kind, express or implied, as to the operation of this website or the information, content, materials, or products 
+                        included on this website. To the full extent permissible by law, the Owner disclaims all warranties, express or implied, 
+                        including, but not limited to, implied warranties of merchantability and fitness for a particular purpose.
+                    "#
+
+                    <H3>"7. Limitation of Liability"</H3>
+                    r#"
+                        The Owner will not be liable for any damages of any kind arising from the use of this website, including, but not limited to, direct, indirect, incidental, punitive, and consequential damages.
+                    "#
+
+                    <H3>"Contact Information"</H3>
+                    r#"
+                        If you have any questions about these Terms or this website, you may contact the Owner at 
+                    "#
+                    <Link href="mailto:aoxo.contact@gmail.com">
+                        "aoxo.contact@gmail.com"
+                    </Link>
+                    <p class="pt-5 text-sm">{format!("Last Updated: {}", chrono::offset::Local::now().format("%d-%m-%Y"))}</p>
+                </p>
+
+            </div>
+        </BaseHtml>
+    }
+}
+
+#[component]
 fn Contact(cx: Scope) -> impl IntoView {
     view! { cx,
         <BaseHtml title="Contact - AOx0">
@@ -567,6 +670,10 @@ async fn show_contact() -> Html<String> {
     Html(render_to_string(|cx| view! {cx, <Contact /> }))
 }
 
+async fn show_terms() -> Html<String> {
+    Html(render_to_string(|cx| view! {cx, <Terms /> }))
+}
+
 async fn show_blog() -> Html<String> {
     Html(render_to_string(|cx| view! {cx, <Blog /> }))
 }
@@ -591,6 +698,7 @@ async fn main() -> Result<()> {
         )
         .route("/", get(say_hello))
         .route("/contact/", get(show_contact))
+        .route("/terms/", get(show_terms))
         .route("/blog/", get(show_blog))
         .nest_service("/static/", static_service);
 
@@ -605,22 +713,21 @@ async fn main() -> Result<()> {
             println!("Removing old {out_dir}");
             remove_dir_all(&out_dir).await?;
         }
-        println!("Executing suckit http://127.0.0.1:{port}/ -j 8 -o {current}");
+        println!("Executing commands");
         Command::new("suckit")
             .args(format!("http://127.0.0.1:{port}/ -j 8 -o {current}",).split_whitespace())
             .status()?;
-        println!("Executing ruplacer \"index.html\" \"./\" {out_dir} --go");
         Command::new("ruplacer")
-            .args(format!("index.html ./ {out_dir} --go").split_whitespace())
+            .args(format!("index.html ./ {out_dir} --quiet --go").split_whitespace())
             .status()?;
         Command::new("ruplacer")
             .args(
-                format!(r#"\.\./\.\./([a-z.]*)(\.com) https://$1$2 {out_dir} --go"#)
+                format!(r#"\.\./\.\./([a-z.]*)(\.com) https://$1$2 {out_dir} --quiet --go"#)
                     .split_whitespace(),
             )
             .status()?;
         Command::new("ruplacer")
-            .args(["index_no_slash.html", "", &out_dir, "--go"])
+            .args(["index_no_slash.html", "", &out_dir, "--quiet", "--go"])
             .status()?;
         txs.send(()).unwrap();
         Ok(())

@@ -9,6 +9,7 @@ edition = "2021"
 aho-corasick = "0.7.20"
 anyhow = "1.0.68"
 axum = "0.6.1"
+chrono = "0.4.23"
 http = "0.2.8"
 leptos = { path="../leptos/leptos", default-features = false, features = ["ssr", "stable"] }
 tokio = { version = "1.23.0", features = ["full"] }
