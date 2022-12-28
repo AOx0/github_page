@@ -338,7 +338,25 @@ fn P(cx: Scope, children: Box<dyn Fn(Scope) -> Fragment>) -> impl IntoView {
 pub fn Tag(cx: Scope, name: &'static str, tag: &'static str) -> impl IntoView {
     view! { cx,
         <div class="relative pr-0.5">
-            <button id=tag x-on:click=format!("if (search !== '{name}') {{ search='{name}' }} else {{ search='' }}") class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-900/30 dark:text-gray-400 dark:shadow-highlight/4" type="button">
+            <button id=tag
+                type="button"
+                x-effect=format!("
+                    if (hasValue(search, '{name}')) {{ 
+                        $el.classList.remove('bg-gray-400/10'); 
+                        $el.classList.remove('dark:bg-gray-900/30'); 
+                        $el.classList.add('bg-gray-800/10'); 
+                        $el.classList.add('dark:bg-gray-600/30'); 
+                    }} else {{
+                        $el.classList.add('bg-gray-400/10'); 
+                        $el.classList.add('dark:bg-gray-900/30'); 
+                        $el.classList.remove('bg-gray-800/10'); 
+                        $el.classList.remove('dark:bg-gray-600/30'); 
+                    }}
+                ")
+                x-on:click=format!("if (!hasValue(search, '{name}')) {{ search=addWord(search, '{name}') }} else {{ search=removeWord(search, '{name}') }}")
+                class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex
+                    items-center dark:bg-gray-900/30 dark:text-gray-400 dark:shadow-highlight/4"
+            >
                 {name}
             </button>
         </div>
@@ -376,16 +394,45 @@ pub fn BlogEntryNutshell(
 fn Blog(cx: Scope) -> impl IntoView {
     view! { cx,
         <BaseHtml title="Blog - AOx0" alpine=true>
+            <script>
+                r#"
+                    function hasValue(searchIn, searchFor) {
+                      const searchForWords = searchFor.split(/[ ,]+/);
+                      for (const word of searchForWords) {
+                        if (searchIn.includes(word)) {
+                          return true;
+                        }
+                      }
+                      return false;
+                    }
+                    
+                    function removeWord(string, word) {
+                      const parts = string.split(/(, | )/);
+                      const filteredParts = parts.filter(part => part !== word && part !== `, ${word}` && part !== ` ${word}`);
+                      const newString = filteredParts.join("");
+
+                      return newString.replace(/[, ]+/g, " ").trim().replace(/^[, ]+|[, ]+$/g, "");
+                    }
+        
+                    function addWord(string, word) {
+                        const words = string.split(/[, ]+/);
+                        if (!words.includes(word)) {
+                            words.push(word);
+                        }
+                        return words.join(" ").replace(/^[, ]+|[, ]+$/g, "");
+                    }
+                "#
+            </script>
             <div
                 class="wrapper relative max-w-screen-md container text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100"
-                 x-data="{
+                 x-data=r#"{
                     search: '',
                     show_item(el){
                         console.log('triggered');
                         console.log(el.textContent);
-                        return this.search === '' || el.textContent.toLowerCase().includes(this.search.toLowerCase());
+                        return this.search === '' || hasValue(el.textContent.toLowerCase(), this.search.toLowerCase());
                     }
-                }"
+                }"#
             >
                 <div class="lg:text-sm lg:leading-6 relative">
                     <div class="sticky pointer-events-none">
