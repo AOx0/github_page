@@ -338,7 +338,7 @@ fn P(cx: Scope, children: Box<dyn Fn(Scope) -> Fragment>) -> impl IntoView {
 pub fn Tag(cx: Scope, name: &'static str, tag: &'static str) -> impl IntoView {
     view! { cx,
         <div class="relative pr-0.5">
-            <button id=tag class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-900/30 dark:text-gray-400 dark:shadow-highlight/4" type="button">
+            <button id=tag x-on:click=format!("if (search !== '{name}') {{ search='{name}' }} else {{ search='' }}") class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-900/30 dark:text-gray-400 dark:shadow-highlight/4" type="button">
                 {name}
             </button>
         </div>
@@ -350,18 +350,19 @@ pub fn BlogEntryNutshell(
     cx: Scope,
     href: &'static str,
     title: &'static str,
+    date: &'static str,
     des: &'static str,
+    tags: &'static [(&'static str, &'static str)],
 ) -> impl IntoView {
-    let tags = &[("C++", "cpp"), ("ML", "machine-learning"), ("Rust", "rust")];
     view! { cx,
-        <div class="flex flex-col">
+        <div class="flex flex-col" x-show="show_item($el)">
             <div class="flex">
+                <Tag name=date tag=date />
                 { tags.into_iter().map(|(name, tag)| view! {cx, <Tag name=name tag=tag/>}).collect::<Vec<_>>() }
             </div>
             <a href=href>
                 <div class="flex justify-between items-center flex-row-revert">
                     <H5 more="hover:text-orange-500 text-left">{title}</H5>
-                    <p class="font-thin">"2022-10-11"</p>
                 </div>
             </a>
             <a href=href>
@@ -374,10 +375,20 @@ pub fn BlogEntryNutshell(
 #[component]
 fn Blog(cx: Scope) -> impl IntoView {
     view! { cx,
-        <BaseHtml title="Blog - AOx0">
-            <div class="relative max-w-screen-md container text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+        <BaseHtml title="Blog - AOx0" alpine=true>
+            <div
+                class="wrapper relative max-w-screen-md container text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100"
+                 x-data="{
+                    search: '',
+                    show_item(el){
+                        console.log('triggered');
+                        console.log(el.textContent);
+                        return this.search === '' || el.textContent.toLowerCase().includes(this.search.toLowerCase());
+                    }
+                }"
+            >
                 <div class="lg:text-sm lg:leading-6 relative">
-                <div class="sticky pointer-events-none">
+                    <div class="sticky pointer-events-none">
                         <div class="relative pointer-events-auto">
                             <div
                                 class=
@@ -385,16 +396,18 @@ fn Blog(cx: Scope) -> impl IntoView {
                                     shadow-sm py-1.5 pl-2 pr-3 hover:ring-gray-300 dark:bg-gray-900/30 dark:highlight-white/5 dark:hover:bg-gray-800"
                             >
                                 <svg width="24" height="24" fill="none" aria-hidden="true" class="mr-3 flex-none"><path d="m19 19-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></svg>
-                                <input class="h-full grow !border-none !focus:ring-0 !outline-none relative bg-transparent" type="text" placeholder="Quick search..."/>
+                                <input x-model="search" type="search" class="search-input h-full grow !border-none !focus:ring-0 !outline-none relative bg-transparent" placeholder="Quick search..."/>
                             </div>
                         </div>
-                </div>
+                    </div>
                 </div>
                 <div class="flex flex-col space-y-10 md:space-y-0">
                     <H1>"Blog"</H1>
                 </div>
                 <div class="flex flex-col space-y-10 md:space-y-0">
                     <BlogEntryNutshell href="#" title="Type guidance on APIs using PhantomData"
+                        tags=&[("Rust", "rust")]
+                        date="2022-10-11"
                         des="When writing APIs it's easy for users to make
                         misuses of methods defined within a struct. There are 
                         cases when you might want to restrict the methods available 
@@ -402,6 +415,8 @@ fn Blog(cx: Scope) -> impl IntoView {
                         talk about Rust's PhantomData and how to use it to design unbreakable APIs."
                     />
                     <BlogEntryNutshell href="#" title="Data analysis exercise: COVID19 in México"
+                        tags=&[("Mathematica", "mathematica")]
+                        date="2022-10-11"
                         des="COVID-19 reached every place on the earth.
                         An examination of open data from México will reveal the situation there. 
                         This paper aims to describe it by showing plenty of plots and graphs, 
