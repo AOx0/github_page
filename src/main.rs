@@ -1,10 +1,14 @@
-use anyhow::Result;
+use std::{env::set_current_dir, path::PathBuf, rc::Rc};
+
+use anyhow::{Context, Result};
 use axum::{
     response::{Html, Redirect},
     routing::get,
     Router, Server,
 };
 use leptos::*;
+use std::process::Command;
+use tokio::{fs::remove_dir_all, net::TcpStream, sync::mpsc::channel};
 
 async fn handle_error(err: std::io::Error) -> (http::StatusCode, String) {
     (
@@ -30,7 +34,7 @@ fn Footer(cx: Scope) -> impl IntoView {
 fn MoonIcon(cx: Scope) -> impl IntoView {
     view! {cx,
         <svg class="hidden dark:block" height="1em" viewBox="0 0 50 50" width="1em" xmlns="http://www.w3.org/2000/svg">
-            <svg::path d="M 43.81 29.354 C 43.688 28.958 43.413 28.626 43.046 28.432 C 42.679 28.238 42.251 28.198 41.854 28.321 C 36.161 29.886 30.067 28.272 25.894 24.096 C 21.722 19.92 20.113 13.824 21.683 8.133 C 21.848 7.582 21.697 6.985 21.29 6.578 C 20.884 6.172 20.287 6.022 19.736 6.187 C 10.659 8.728 4.691 17.389 5.55 26.776 C 6.408 36.163 13.847 43.598 23.235 44.451 C 32.622 45.304 41.28 39.332 43.816 30.253 C 43.902 29.96 43.9 29.647 43.81 29.354 Z" fill="currentColor"/>
+            <svg::path d="M 43.81 29.354 C 43.688 28.958 43.413 28.626 43.046 28.432 C 42.679 28.238 42.251 28.198 41.854 28.321 C 36.161 29.886 30.067 28.272 25.894 24.096 C 21.722 19.92 20.113 13.824 21.683 8.133 C 21.848 7.582 21.697 6.985 21.29 6.578 C 20.884 6.172 20.287 6.022 19.736 6.187 C 10.9 8.728 4.691 17.389 5.55 26.776 C 6.408 36.163 13.847 43.598 23.235 44.451 C 32.622 45.304 41.28 39.332 43.816 30.253 C 43.902 29.96 43.9 29.647 43.81 29.354 Z" fill="currentColor"/>
         </svg>
     }
 }
@@ -119,9 +123,9 @@ pub fn ItemsCollection(cx: Scope) -> impl IntoView {
     view! { cx,
         <MenuItem href="/">"Home"</MenuItem>
         // <MenuItem href="/portfolio">"Portfolio"</MenuItem>
-        <MenuItem href="/blog">"Blog"</MenuItem>
+        <MenuItem href="/blog/">"Blog"</MenuItem>
         // <MenuItem href="/resume">"Resume"</MenuItem>
-        <MenuItem href="/contact">"Contact"</MenuItem>
+        <MenuItem href="/contact/">"Contact"</MenuItem>
     }
 }
 
@@ -428,8 +432,6 @@ fn Blog(cx: Scope) -> impl IntoView {
                  x-data=r#"{
                     search: '',
                     show_item(el){
-                        console.log('triggered');
-                        console.log(el.textContent);
                         return this.search === '' || hasValue(el.textContent.toLowerCase(), this.search.toLowerCase());
                     }
                 }"#
@@ -573,6 +575,8 @@ async fn say_hello() -> Html<String> {
     Html(render_to_string(|cx| view! {cx, <Home /> }))
 }
 
+fn set_return_type<T, F: std::future::Future<Output = T>>(_arg: &F) {}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let static_service = axum::error_handling::HandleError::new(
@@ -586,11 +590,55 @@ async fn main() -> Result<()> {
             get(|| async { Redirect::permanent("/static/favicon.ico") }),
         )
         .route("/", get(say_hello))
-        .route("/contact", get(show_contact))
-        .route("/blog", get(show_blog))
+        .route("/contact/", get(show_contact))
+        .route("/blog/", get(show_blog))
         .nest_service("/static/", static_service);
 
-    Ok(Server::bind(&"0.0.0.0:8000".parse()?)
-        .serve(app.into_make_service())
-        .await?)
+    let port = "8000";
+    let (txs, rxs) = tokio::sync::oneshot::channel::<()>();
+
+    let renderer = async move {
+        let current = format!("{}/target", std::env!("CARGO_MANIFEST_DIR"));
+        let out_dir = format!("{current}/127.0.0.1");
+
+        if PathBuf::from(&out_dir).exists() {
+            println!("Removing old {out_dir}");
+            remove_dir_all(&out_dir).await?;
+        }
+        println!("Executing suckit http://127.0.0.1:{port}/ -j 8 -o {current}");
+        Command::new("suckit")
+            .args(format!("http://127.0.0.1:{port}/ -j 8 -o {current}",).split_whitespace())
+            .status()?;
+        println!("Executing ruplacer \"index.html\" \"./\" {out_dir} --go");
+        Command::new("ruplacer")
+            .args(format!("index.html ./ {out_dir} --go").split_whitespace())
+            .status()?;
+        Command::new("ruplacer")
+            .args(
+                format!(r#"\.\./\.\./([a-z.]*)(\.com) https://$1$2 {out_dir} --go"#)
+                    .split_whitespace(),
+            )
+            .status()?;
+        Command::new("ruplacer")
+            .args(["index_no_slash.html", "", &out_dir, "--go"])
+            .status()?;
+        txs.send(()).unwrap();
+        Ok(())
+    };
+    set_return_type::<Result<()>, _>(&renderer);
+
+    let a = tokio::spawn(renderer);
+
+    let server = Server::bind(&format!("127.0.0.1:{port}").parse()?).serve(app.into_make_service());
+
+    let graceful = server.with_graceful_shutdown(async move {
+        println!("Starting Axum Server");
+        rxs.await.ok();
+        println!("Ending Axum Server");
+    });
+
+    graceful.await?;
+    println!("Axum Server Ended");
+    a.await??;
+    Ok(())
 }

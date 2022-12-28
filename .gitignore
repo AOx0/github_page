@@ -3,3 +3,5 @@
 static/styles.css
 
 Cargo.lock
+
+.DS_Store
