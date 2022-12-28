@@ -722,7 +722,7 @@ async fn main() -> Result<()> {
             .status()?;
         Command::new("ruplacer")
             .args(
-                format!(r#"\.\./\.\./([a-z.]*)(\.com) https://$1$2 {out_dir} --quiet --go"#)
+                format!(r#"(\.\./)+([a-z.]*)(\.com) https://$2$3 {out_dir} --quiet --go"#)
                     .split_whitespace(),
             )
             .status()?;
