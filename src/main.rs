@@ -1,14 +1,13 @@
-use std::{env::set_current_dir, path::PathBuf, rc::Rc};
-
-use anyhow::{Context, Result};
+use anyhow::Result;
 use axum::{
     response::{Html, Redirect},
     routing::get,
     Router, Server,
 };
 use leptos::*;
+use std::path::PathBuf;
 use std::process::Command;
-use tokio::{fs::remove_dir_all, net::TcpStream, sync::mpsc::channel};
+use tokio::fs::remove_dir_all;
 
 async fn handle_error(err: std::io::Error) -> (http::StatusCode, String) {
     (
