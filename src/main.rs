@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use anyhow::Result;
 use axum::{
     response::{Html, Redirect},
@@ -25,11 +27,11 @@ fn Footer(cx: Scope) -> impl IntoView {
                     "Copyright © 2023 Alejandro Osornio (AOx0). All rights reserved."
                     <br/>
                     "Made by AOx0 with "
-                    <a href="https://github.com/gbj/leptos" class="underline">"Leptos"</a>
+                    <a target="_blank" rel="noopener noreferrer" href="https://github.com/gbj/leptos" class="underline">"Leptos"</a>
                     ", "
-                    <a href="https://github.com/alpinejs/alpine" class="underline">"AlpineJS"</a>
+                    <a target="_blank" rel="noopener noreferrer" href="https://github.com/alpinejs/alpine" class="underline">"AlpineJS"</a>
                     " &amp; "
-                    <a href="https://github.com/tailwindlabs/tailwindcss" class="underline">"TailwindCSS"</a>
+                    <a target="_blank" rel="noopener noreferrer" href="https://github.com/tailwindlabs/tailwindcss" class="underline">"TailwindCSS"</a>
                     ". "
                     <a href="/terms/" class="underline">"Terms"</a>
                 </div>
@@ -523,18 +525,18 @@ fn Welcome(cx: Scope) -> impl IntoView {
 #[component]
 fn Terms(cx: Scope) -> impl IntoView {
     view! {cx,
-        <BaseHtml title="Terms - AOx0">
-            <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
-                <H1>"Terms of Service"</H1>
-                <p class="text-justify">
-                    r#"
+            <BaseHtml title="Terms - AOx0">
+                <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                    <H1>"Terms of Service"</H1>
+                    <p class="text-justify">
+                        r#"
                         This website is a personal portfolio owned and operated by Alejandro Osornio (the "Owner").
                         By accessing or using this website, you agree to be bound by these terms of service (these "Terms"). 
                         If you do not agree to these Terms, you may not access or use this website.
                     "#
 
-                    <H3>"1. License to Use Website"</H3>
-                    r#"
+                        <H3>"1. License to Use Website"</H3>
+                        r#"
                         Subject to your compliance with these Terms, the Owner grants you a limited, non-exclusive, non-transferable, 
                         revocable license to access and use this website for your personal, non-commercial use only. 
                         This license does not include the right to: (a) sell, resell, or exploit for any commercial purposes, 
@@ -543,24 +545,69 @@ fn Terms(cx: Scope) -> impl IntoView {
                         except as expressly permitted on this website; or (d) use this website other than for its intended purpose.
                     "#
 
-                    <H3>"2. Open-Source Software"</H3>
-                    r#"
+                        <H3>"2. Open-Source Software"</H3>
+                        r#"
                         This website includes the following open-source software, which is distributed under the specified licenses:
                     "#
-                    r#"
+                        <br/>
+
+    <table class="w-full border-collapse text-sm py-10">
+      <thead>
+        <tr class="text-xs font-semibold uppercase tracking-wider">
+          <th class="px-4 py-2">"Project Name"</th>
+          <th class="px-4 py-2">"Project Licenses"</th>
+          <th class="px-4 py-2">"Chosen License"</th>
+          <th class="px-4 py-2">"Project Repository"</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
+          <td class="px-4 py-2">"AlpineJS"</td>
+          <td class="px-4 py-2">"MIT"</td>
+          <td class="px-4 py-2">"MIT"</td>
+          <td class="px-4 py-2">
+            <a href="https://github.com/alpinejs/alpine" class="text-blue-500 hover:underline">"https://github.com/alpinejs/alpine"</a>
+          </td>
+        </tr>
+        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
+          <td class="px-4 py-2">"TailwindCSS"</td>
+          <td class="px-4 py-2">"MIT"</td>
+          <td class="px-4 py-2">"MIT"</td>
+          <td class="px-4 py-2">
+            <a href="https://github.com/tailwindlabs/tailwindcss" class="text-blue-500 hover:underline">"https://github.com/tailwindlabs/tailwindcss"</a>
+          </td>
+        </tr>
+        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
+          <td class="px-4 py-2">"Leptos"</td>
+          <td class="px-4 py-2">"MIT"</td>
+          <td class="px-4 py-2">"MIT"</td>
+          <td class="px-4 py-2">
+            <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"https://github.com/gbj/leptos"</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+                        //     r#"4. Tokio (<a href="https://github.com/tokio-rs/tokio" class="underline">https://github.com/tokio-rs/tokio</a>)
+                        //     - MIT License (<a href="https://github.com/tokio-rs/tokio/blob/master/LICENSE" class="underline">https://github.com/tokio-rs/tokio/blob/master/LICENSE</a>)"#
+                        // <br/>
+                        //     r#"5. Tokio/Axum (<a href="https://github.com/tokio-rs/axum" class="underline">https://github.com/tokio-rs/axum</a>)
+                        //     - MIT License (<a href="https://github.com/tokio-rs/tokio/blob/master/LICENSE" class="underline">https://github.com/tokio-rs/tokio/blob/master/LICENSE</a>)"#
+                        // <br/>
+                        <br/>
+                        r#"
                         By using this website, you agree to be bound by the terms of the applicable open-source software licenses.
                         You must include a copy of the applicable open-source software licenses and retain the copyright notice in any 
                         copies of the open-source software that you distribute. You must also provide appropriate attribution to the original 
                         authors of the open-source software as required by the terms of the applicable open-source software licenses.
                     "#
 
-                    <H3>"3. Cookie Policy"</H3>
-                    r#"
+                        <H3>"3. Cookie Policy"</H3>
+                        r#"
                         This website uses cookies to improve the user experience. These cookies do not collect any personal information or track your browsing activity. They are used solely for the purpose of providing a better user experience on this website. By using this website, you consent to the use of cookies.
                     "#
 
-                    <H3>"4. Intellectual Property"</H3>
-                    r#"
+                        <H3>"4. Intellectual Property"</H3>
+                        r#"
                         This website and all content, services, and products available on or through this website, including, but not limited 
                         to, text, graphics, logos, images, and software, are the property of the Owner or its licensors.
                         You may not use any content, services, or products on this website for any commercial 
@@ -568,39 +615,39 @@ fn Terms(cx: Scope) -> impl IntoView {
                         to the Owner and include a link to this website.
                     "#
 
-                    <H3>"5. User Conduct"</H3>
-                    r#"
+                        <H3>"5. User Conduct"</H3>
+                        r#"
                         You agree to use this website only for lawful purposes and in a way that does not infringe the rights of, restrict, 
                         or inhibit anyone else's use and enjoyment of this website. You may not use this website in any manner that could 
                         damage, disable, overburden, or impair this website or interfere with any other party's use and enjoyment of this website.
                     "#
 
-                    <H3>"6. Disclaimer of Warranties"</H3>
-                    r#"
+                        <H3>"6. Disclaimer of Warranties"</H3>
+                        r#"
                         This website is provided on an "as is" and "as available" basis. The Owner makes no representations or warranties of 
                         any kind, express or implied, as to the operation of this website or the information, content, materials, or products 
                         included on this website. To the full extent permissible by law, the Owner disclaims all warranties, express or implied, 
                         including, but not limited to, implied warranties of merchantability and fitness for a particular purpose.
                     "#
 
-                    <H3>"7. Limitation of Liability"</H3>
-                    r#"
+                        <H3>"7. Limitation of Liability"</H3>
+                        r#"
                         The Owner will not be liable for any damages of any kind arising from the use of this website, including, but not limited to, direct, indirect, incidental, punitive, and consequential damages.
                     "#
 
-                    <H3>"Contact Information"</H3>
-                    r#"
+                        <H3>"Contact Information"</H3>
+                        r#"
                         If you have any questions about these Terms or this website, you may contact the Owner at 
                     "#
-                    <Link href="mailto:aoxo.contact@gmail.com">
-                        "aoxo.contact@gmail.com"
-                    </Link>
-                    <p class="pt-5 text-sm">{format!("Last Updated: {}", chrono::offset::Local::now().format("%d-%m-%Y"))}</p>
-                </p>
+                        <Link href="mailto:aoxo.contact@gmail.com">
+                            "aoxo.contact@gmail.com"
+                        </Link>
+                        <p class="pt-5 text-sm">{format!("Last Updated: {}", chrono::offset::Local::now().format("%d-%m-%Y"))}</p>
+                    </p>
 
-            </div>
-        </BaseHtml>
-    }
+                </div>
+            </BaseHtml>
+        }
 }
 
 #[component]
