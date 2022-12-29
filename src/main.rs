@@ -721,12 +721,15 @@ async fn main() -> Result<()> {
             .status()?;
         Command::new("ruplacer")
             .args(
-                format!(r#"(\.\./)+([a-z.]*)(\.com) https://$2$3 {out_dir} --quiet --go"#)
+                format!(r#"(\.\./)+([a-z.]*)(\.com|\.me) https://$2$3 {out_dir} --quiet --go"#)
                     .split_whitespace(),
             )
             .status()?;
         Command::new("ruplacer")
             .args(["index_no_slash.html", "", &out_dir, "--quiet", "--go"])
+            .status()?;
+        Command::new("ruplacer")
+            .args([r#"/\./""#, r#"/""#, &out_dir, "--quiet", "--go"])
             .status()?;
         txs.send(()).unwrap();
         Ok(())
