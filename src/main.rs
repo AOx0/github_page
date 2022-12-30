@@ -267,7 +267,7 @@ fn BaseHtml(
                 x-data=x_data
                 class="flex flex-col h-screen bg-white dark:bg-gray-800 text-black dark:text-gray-100"
             >
-            <div class="flex-auto">{children(cx)}</div>
+                <div class="flex-auto">{children(cx)}</div>
             </body>
             <Footer/>
         </html>
@@ -712,26 +712,114 @@ fn Home(cx: Scope) -> impl IntoView {
     }
 }
 
+pub fn render<F, N>(f: F) -> String
+where
+    F: FnOnce(Scope) -> N + 'static,
+    N: IntoView,
+{
+    let patterns = &[
+        "<!--/-->",
+        "<!--#-->",
+        ":shift",
+        ":enter",
+        ":space",
+        ":ctrl",
+        ":cmd",
+        ":meta",
+        ":alt",
+        ":up",
+        ":down",
+        ":left",
+        ":right",
+        ":escape",
+        ":tab",
+        ":caps-lock",
+        ":equal",
+        ":period",
+        ":slash",
+        ":prevent",
+        ":stop",
+        ":outside",
+        ":window",
+        ":document",
+        ":once",
+        ":debounce",
+        ":throttle",
+        ":self",
+        ":camel",
+        ":dot",
+        ":passive",
+        ":lazy",
+        ":number",
+    ];
+    let replacements = &[
+        "",
+        "",
+        ".shift",
+        ".enter",
+        ".space",
+        ".ctrl",
+        ".cmd",
+        ".meta",
+        ".alt",
+        ".up",
+        ".down",
+        ".left",
+        ".right",
+        ".escape",
+        ".tab",
+        ".caps-lock",
+        ".equal",
+        ".period",
+        ".slash",
+        ".prevent",
+        ".stop",
+        ".outside",
+        ".window",
+        ".document",
+        ".once",
+        ".debounce",
+        ".throttle",
+        ".self",
+        ".camel",
+        ".dot",
+        ".passive",
+        ".lazy",
+        ".number",
+    ];
+
+    let rdr = "<!DOCTYPE html>".to_owned() + &render_to_string(f);
+    let mut wtr = vec![];
+
+    let ac = aho_corasick::AhoCorasick::new(patterns);
+    ac.stream_replace_all(rdr.as_bytes(), &mut wtr, replacements)
+        .expect("stream_replace_all failed");
+
+    String::from_utf8(wtr).unwrap()
+}
+
 async fn show_contact() -> Html<String> {
-    Html(render_to_string(|cx| view! {cx, <Contact /> }))
+    Html(render(|cx| view! {cx, <Contact /> }))
 }
 
 async fn show_terms() -> Html<String> {
-    Html(render_to_string(|cx| view! {cx, <Terms /> }))
+    Html(render(|cx| view! {cx, <Terms /> }))
 }
 
 async fn show_blog() -> Html<String> {
-    Html(render_to_string(|cx| view! {cx, <Blog /> }))
+    Html(render(|cx| view! {cx, <Blog /> }))
 }
 
 async fn say_hello() -> Html<String> {
-    Html(render_to_string(|cx| view! {cx, <Home /> }))
+    Html(render(|cx| view! {cx, <Home /> }))
 }
 
 fn set_return_type<T, F: std::future::Future<Output = T>>(_arg: &F) {}
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let args: Vec<String> = std::env::args().collect();
+
     let static_service = axum::error_handling::HandleError::new(
         tower_http::services::ServeDir::new("./static"),
         handle_error,
@@ -783,18 +871,26 @@ async fn main() -> Result<()> {
     };
     set_return_type::<Result<()>, _>(&renderer);
 
-    let a = tokio::spawn(renderer);
+    if args.len() == 1 {
+        let a = tokio::spawn(renderer);
 
-    let server = Server::bind(&format!("127.0.0.1:{port}").parse()?).serve(app.into_make_service());
+        let server =
+            Server::bind(&format!("127.0.0.1:{port}").parse()?).serve(app.into_make_service());
 
-    let graceful = server.with_graceful_shutdown(async move {
-        println!("Starting Axum Server");
-        rxs.await.ok();
-        println!("Ending Axum Server");
-    });
+        let graceful = server.with_graceful_shutdown(async move {
+            println!("Starting Axum Server");
+            rxs.await.ok();
+            println!("Ending Axum Server");
+        });
 
-    graceful.await?;
-    println!("Axum Server Ended");
-    a.await??;
-    Ok(())
+        graceful.await?;
+        println!("Axum Server Ended");
+        a.await??;
+        Ok(())
+    } else {
+        Server::bind(&format!("127.0.0.1:{port}").parse()?)
+            .serve(app.into_make_service())
+            .await?;
+        Ok(())
+    }
 }
