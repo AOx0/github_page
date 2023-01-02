@@ -1,14 +1,18 @@
 #![allow(dead_code)]
 
 use anyhow::Result;
+use axum::extract::Path;
 use axum::{
     response::{Html, Redirect},
     routing::get,
     Router, Server,
 };
+use comrak::plugins::syntect::SyntectAdapter;
+use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
 use leptos::*;
-use std::path::PathBuf;
-use std::process::Command;
+use std::str::FromStr;
+use std::{fs::OpenOptions, path::PathBuf};
+use std::{io::Read, process::Command};
 use tokio::fs::remove_dir_all;
 
 async fn handle_error(err: std::io::Error) -> (http::StatusCode, String) {
@@ -216,10 +220,11 @@ fn NavBar(cx: Scope) -> impl IntoView {
 #[component]
 fn BaseHtml(
     cx: Scope,
-    title: &'static str,
+    title: String,
     #[prop(optional)] x_data: &'static str,
     #[prop(optional)] katex: bool,
     #[prop(optional)] alpine: bool,
+    #[prop(optional)] blog: bool,
     children: Box<dyn Fn(Scope) -> Fragment>,
 ) -> impl IntoView {
     view! { cx,
@@ -231,6 +236,7 @@ fn BaseHtml(
                 <meta charset="UTF-8"/>
                 <link rel="stylesheet" href="/static/styles.css"/>
                 {(alpine || x_data != "").then(|| view!{cx, <script src=r"https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer init />})}
+                {blog.then(|| view!{cx, <link rel="stylesheet" href="/static/blog_styles.css"/>})}
                 <script>
                     "const html = document.getElementsByTagName('html')[0];
                     if (localStorage.theme === 'dark' || !('theme' in localStorage)) {
@@ -322,17 +328,6 @@ fn H3(
 }
 
 #[component]
-fn H5(
-    cx: Scope,
-    #[prop(optional)] more: &'static str,
-    children: Box<dyn Fn(Scope) -> Fragment>,
-) -> impl IntoView {
-    view! { cx,
-        <h5 class=format!("text-xl font-semibold pb-5 pt-1 {more}")>{children(cx)}</h5>
-    }
-}
-
-#[component]
 fn Caption(cx: Scope, msg: &'static str) -> impl IntoView {
     view! { cx,
         <p class="text-sm font-light block text-center pt-1">
@@ -405,7 +400,7 @@ pub fn BlogEntryNutshell(
             </div>
             <a href=href>
                 <div class="flex justify-between items-center flex-row-revert">
-                    <H5 more="hover:text-orange-500 text-left">{title}</H5>
+                    <h2 class="blog-title hover:text-orange-500 text-left">{title}</h2>
                 </div>
             </a>
             <a href=href>
@@ -418,7 +413,7 @@ pub fn BlogEntryNutshell(
 #[component]
 fn Blog(cx: Scope) -> impl IntoView {
     view! { cx,
-        <BaseHtml title="Blog - AOx0" alpine=true>
+        <BaseHtml title="Blog - AOx0".to_owned() alpine=true>
             <script>
                 r#"
                     function hasValue(searchIn, searchFor) {
@@ -475,7 +470,7 @@ fn Blog(cx: Scope) -> impl IntoView {
                     <H1>"Blog"</H1>
                 </div>
                 <div class="flex flex-col space-y-10 md:space-y-0">
-                    <BlogEntryNutshell href="#" title="Type guidance on APIs using PhantomData"
+                    <BlogEntryNutshell href="./test/" title="Type guidance on APIs using PhantomData"
                         tags=&[("Rust", "rust")]
                         date="2022-10-11"
                         des="When writing APIs it's easy for users to make
@@ -484,7 +479,7 @@ fn Blog(cx: Scope) -> impl IntoView {
                         downstream depending on the state of an instance. In this writeup I 
                         talk about Rust's PhantomData and how to use it to design unbreakable APIs."
                     />
-                    <BlogEntryNutshell href="#" title="Data analysis exercise: COVID19 in México"
+                    <BlogEntryNutshell href="./covid/" title="Data analysis exercise: COVID19 in México"
                         tags=&[("Mathematica", "mathematica")]
                         date="2022-10-11"
                         des="COVID-19 reached every place on the earth.
@@ -525,18 +520,18 @@ fn Welcome(cx: Scope) -> impl IntoView {
 #[component]
 fn Terms(cx: Scope) -> impl IntoView {
     view! {cx,
-            <BaseHtml title="Terms - AOx0">
-                <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
-                    <H1>"Terms of Service"</H1>
-                    <p class="text-justify">
-                        r#"
+        <BaseHtml title="Terms - AOx0".to_owned()>
+            <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                <H1>"Terms of Service"</H1>
+                <p class="text-justify">
+                    r#"
                         This website is a personal portfolio owned and operated by Alejandro Osornio (the "Owner").
                         By accessing or using this website, you agree to be bound by these terms of service (these "Terms"). 
                         If you do not agree to these Terms, you may not access or use this website.
                     "#
 
-                        <H3>"1. License to Use Website"</H3>
-                        r#"
+                    <H3>"1. License to Use Website"</H3>
+                    r#"
                         Subject to your compliance with these Terms, the Owner grants you a limited, non-exclusive, non-transferable, 
                         revocable license to access and use this website for your personal, non-commercial use only. 
                         This license does not include the right to: (a) sell, resell, or exploit for any commercial purposes, 
@@ -545,69 +540,64 @@ fn Terms(cx: Scope) -> impl IntoView {
                         except as expressly permitted on this website; or (d) use this website other than for its intended purpose.
                     "#
 
-                        <H3>"2. Open-Source Software"</H3>
-                        r#"
+                    <H3>"2. Open-Source Software"</H3>
+                    r#"
                         This website includes the following open-source software, which is distributed under the specified licenses:
                     "#
-                        <br/>
+                    <br/>
 
-    <table class="w-full border-collapse text-sm py-10">
-      <thead>
-        <tr class="text-xs font-semibold uppercase tracking-wider">
-          <th class="px-4 py-2">"Project Name"</th>
-          <th class="px-4 py-2">"Project Licenses"</th>
-          <th class="px-4 py-2">"Chosen License"</th>
-          <th class="px-4 py-2">"Project Repository"</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
-          <td class="px-4 py-2">"AlpineJS"</td>
-          <td class="px-4 py-2">"MIT"</td>
-          <td class="px-4 py-2">"MIT"</td>
-          <td class="px-4 py-2">
-            <a href="https://github.com/alpinejs/alpine" class="text-blue-500 hover:underline">"https://github.com/alpinejs/alpine"</a>
-          </td>
-        </tr>
-        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
-          <td class="px-4 py-2">"TailwindCSS"</td>
-          <td class="px-4 py-2">"MIT"</td>
-          <td class="px-4 py-2">"MIT"</td>
-          <td class="px-4 py-2">
-            <a href="https://github.com/tailwindlabs/tailwindcss" class="text-blue-500 hover:underline">"https://github.com/tailwindlabs/tailwindcss"</a>
-          </td>
-        </tr>
-        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
-          <td class="px-4 py-2">"Leptos"</td>
-          <td class="px-4 py-2">"MIT"</td>
-          <td class="px-4 py-2">"MIT"</td>
-          <td class="px-4 py-2">
-            <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"https://github.com/gbj/leptos"</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-                        //     r#"4. Tokio (<a href="https://github.com/tokio-rs/tokio" class="underline">https://github.com/tokio-rs/tokio</a>)
-                        //     - MIT License (<a href="https://github.com/tokio-rs/tokio/blob/master/LICENSE" class="underline">https://github.com/tokio-rs/tokio/blob/master/LICENSE</a>)"#
-                        // <br/>
-                        //     r#"5. Tokio/Axum (<a href="https://github.com/tokio-rs/axum" class="underline">https://github.com/tokio-rs/axum</a>)
-                        //     - MIT License (<a href="https://github.com/tokio-rs/tokio/blob/master/LICENSE" class="underline">https://github.com/tokio-rs/tokio/blob/master/LICENSE</a>)"#
-                        // <br/>
-                        <br/>
-                        r#"
+                    <table class="w-full border-collapse text-sm py-10">
+                      <thead>
+                        <tr class="text-xs font-semibold uppercase tracking-wider">
+                          <th class="px-4 py-2">"Project Name"</th>
+                          <th class="px-4 py-2">"Project Licenses"</th>
+                          <th class="px-4 py-2">"Chosen License"</th>
+                          <th class="px-4 py-2">"Project Repository"</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
+                          <td class="px-4 py-2">"AlpineJS"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">
+                            <a href="https://github.com/alpinejs/alpine" class="text-blue-500 hover:underline">"https://github.com/alpinejs/alpine"</a>
+                          </td>
+                        </tr>
+                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
+                          <td class="px-4 py-2">"TailwindCSS"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">
+                            <a href="https://github.com/tailwindlabs/tailwindcss" class="text-blue-500 hover:underline">"https://github.com/tailwindlabs/tailwindcss"</a>
+                          </td>
+                        </tr>
+                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
+                          <td class="px-4 py-2">"Leptos"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">
+                            <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"https://github.com/gbj/leptos"</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <br/>
+                    r#"
                         By using this website, you agree to be bound by the terms of the applicable open-source software licenses.
                         You must include a copy of the applicable open-source software licenses and retain the copyright notice in any 
                         copies of the open-source software that you distribute. You must also provide appropriate attribution to the original 
                         authors of the open-source software as required by the terms of the applicable open-source software licenses.
                     "#
 
-                        <H3>"3. Cookie Policy"</H3>
-                        r#"
+                    <H3>"3. Cookie Policy"</H3>
+                    r#"
                         This website uses cookies to improve the user experience. These cookies do not collect any personal information or track your browsing activity. They are used solely for the purpose of providing a better user experience on this website. By using this website, you consent to the use of cookies.
                     "#
 
-                        <H3>"4. Intellectual Property"</H3>
-                        r#"
+                    <H3>"4. Intellectual Property"</H3>
+                    r#"
                         This website and all content, services, and products available on or through this website, including, but not limited 
                         to, text, graphics, logos, images, and software, are the property of the Owner or its licensors.
                         You may not use any content, services, or products on this website for any commercial 
@@ -615,45 +605,45 @@ fn Terms(cx: Scope) -> impl IntoView {
                         to the Owner and include a link to this website.
                     "#
 
-                        <H3>"5. User Conduct"</H3>
-                        r#"
+                    <H3>"5. User Conduct"</H3>
+                    r#"
                         You agree to use this website only for lawful purposes and in a way that does not infringe the rights of, restrict, 
                         or inhibit anyone else's use and enjoyment of this website. You may not use this website in any manner that could 
                         damage, disable, overburden, or impair this website or interfere with any other party's use and enjoyment of this website.
                     "#
 
-                        <H3>"6. Disclaimer of Warranties"</H3>
-                        r#"
+                    <H3>"6. Disclaimer of Warranties"</H3>
+                    r#"
                         This website is provided on an "as is" and "as available" basis. The Owner makes no representations or warranties of 
                         any kind, express or implied, as to the operation of this website or the information, content, materials, or products 
                         included on this website. To the full extent permissible by law, the Owner disclaims all warranties, express or implied, 
                         including, but not limited to, implied warranties of merchantability and fitness for a particular purpose.
                     "#
 
-                        <H3>"7. Limitation of Liability"</H3>
-                        r#"
+                    <H3>"7. Limitation of Liability"</H3>
+                    r#"
                         The Owner will not be liable for any damages of any kind arising from the use of this website, including, but not limited to, direct, indirect, incidental, punitive, and consequential damages.
                     "#
 
-                        <H3>"Contact Information"</H3>
-                        r#"
+                    <H3>"Contact Information"</H3>
+                    r#"
                         If you have any questions about these Terms or this website, you may contact the Owner at 
                     "#
-                        <Link href="mailto:aoxo.contact@gmail.com">
-                            "aoxo.contact@gmail.com"
-                        </Link>
-                        <p class="pt-5 text-sm">{format!("Last Updated: {}", chrono::offset::Local::now().format("%d-%m-%Y"))}</p>
-                    </p>
+                    <Link href="mailto:aoxo.contact@gmail.com">
+                        "aoxo.contact@gmail.com"
+                    </Link>
+                    <p class="pt-5 text-sm">{format!("Last Updated: {}", chrono::offset::Local::now().format("%d-%m-%Y"))}</p>
+                </p>
 
-                </div>
-            </BaseHtml>
-        }
+            </div>
+        </BaseHtml>
+    }
 }
 
 #[component]
 fn Contact(cx: Scope) -> impl IntoView {
     view! { cx,
-        <BaseHtml title="Contact - AOx0">
+        <BaseHtml title="Contact - AOx0".to_owned()>
             <div class="max-w-screen-md relative container text-left justify-left md:text-left
                 v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
                 <H1>"Where to find me"</H1>
@@ -706,8 +696,8 @@ fn ContactItem(
 #[component]
 fn Home(cx: Scope) -> impl IntoView {
     view! { cx,
-        <BaseHtml title="AOx0">
-            <Welcome/>
+        <BaseHtml title="AOx0".to_owned()>
+             <Welcome/>
         </BaseHtml>
     }
 }
@@ -798,6 +788,73 @@ where
     String::from_utf8(wtr).unwrap()
 }
 
+#[component]
+fn MarkdownRenderer3(cx: Scope, file: PathBuf, title: String) -> impl IntoView {
+    use pulldown_cmark::{html, Parser};
+    let mut file = OpenOptions::new().read(true).open(file).unwrap();
+    let mut input = String::new();
+
+    file.read_to_string(&mut input).unwrap();
+
+    let parser = Parser::new(&input);
+
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
+
+    view! { cx,
+        <BaseHtml title=format!("{}{} - AOx0", &title.to_uppercase().chars().into_iter().next().unwrap(), &title[1..] ) katex=true blog=true>
+            <div class="max-w-screen-md relative container text-justify md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                {html_output.to_owned()}
+            </div>
+        </BaseHtml>
+    }
+}
+
+#[component]
+fn MarkdownRenderer2(cx: Scope, file: PathBuf, title: String) -> impl IntoView {
+    use pulldown_cmark::{html, Parser};
+    let mut file = OpenOptions::new().read(true).open(file).unwrap();
+    let mut input = String::new();
+
+    file.read_to_string(&mut input).unwrap();
+
+    let parser = Parser::new(&input);
+
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
+
+    view! { cx,
+        <BaseHtml title=format!("{}{} - AOx0", &title.to_uppercase().chars().into_iter().next().unwrap(), &title[1..] ) katex=true blog=true>
+            <div class="max-w-screen-md relative container text-justify md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                {html_output.to_owned()}
+            </div>
+        </BaseHtml>
+    }
+}
+
+#[component]
+fn MarkdownRenderer(cx: Scope, file: PathBuf, title: String) -> impl IntoView {
+    let mut file = OpenOptions::new().read(true).open(file).unwrap();
+    let mut input = String::new();
+
+    file.read_to_string(&mut input).unwrap();
+
+    let adapter = SyntectAdapter::new("InspiredGitHub");
+    let options = ComrakOptions::default();
+    let mut plugins = ComrakPlugins::default();
+
+    plugins.render.codefence_syntax_highlighter = Some(&adapter);
+    let formatted = markdown_to_html_with_plugins(&input, &options, &plugins);
+
+    view! { cx,
+        <BaseHtml title=format!("{} - AOx0", title.to_uppercase()) katex=true >
+            <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+                {formatted.to_owned()}
+            </div>
+        </BaseHtml>
+    }
+}
+
 async fn show_contact() -> Html<String> {
     Html(render(|cx| view! {cx, <Contact /> }))
 }
@@ -808,6 +865,18 @@ async fn show_terms() -> Html<String> {
 
 async fn show_blog() -> Html<String> {
     Html(render(|cx| view! {cx, <Blog /> }))
+}
+
+async fn show_blog_entry(Path(name): Path<String>) -> Html<String> {
+    let file = format!("{}/blog/{}.md", env!("CARGO_MANIFEST_DIR"), name);
+    Html(render(move |cx| {
+        view! {cx,
+            <MarkdownRenderer2
+                title=name
+                file=PathBuf::from_str(&file).unwrap()
+            />
+        }
+    }))
 }
 
 async fn say_hello() -> Html<String> {
@@ -833,49 +902,62 @@ async fn main() -> Result<()> {
         .route("/", get(say_hello))
         .route("/contact/", get(show_contact))
         .route("/terms/", get(show_terms))
+        .route("/blog/:name/", get(show_blog_entry))
         .route("/blog/", get(show_blog))
         .nest_service("/static/", static_service);
 
     let port = "8000";
-    let (txs, rxs) = tokio::sync::oneshot::channel::<()>();
-
-    let renderer = async move {
-        let current = format!("{}/target", std::env!("CARGO_MANIFEST_DIR"));
-        let out_dir = format!("{current}/127.0.0.1");
-
-        if PathBuf::from(&out_dir).exists() {
-            println!("Removing old {out_dir}");
-            remove_dir_all(&out_dir).await?;
-        }
-        println!("Executing commands");
-        Command::new("suckit")
-            .args(format!("http://127.0.0.1:{port}/ -j 8 -o {current}",).split_whitespace())
-            .status()?;
-        Command::new("ruplacer")
-            .args(format!("index.html ./ {out_dir} --quiet --go").split_whitespace())
-            .status()?;
-        Command::new("ruplacer")
-            .args(
-                format!(r#"(\.\./)+([a-z.]*)(\.com|\.me) https://$2$3 {out_dir} --quiet --go"#)
-                    .split_whitespace(),
-            )
-            .status()?;
-        Command::new("ruplacer")
-            .args(["index_no_slash.html", "", &out_dir, "--quiet", "--go"])
-            .status()?;
-        Command::new("ruplacer")
-            .args([r#"/\./""#, r#"/""#, &out_dir, "--quiet", "--go"])
-            .status()?;
-        txs.send(()).unwrap();
-        Ok(())
-    };
-    set_return_type::<Result<()>, _>(&renderer);
 
     if args.len() == 1 {
+        let (txs, rxs) = tokio::sync::oneshot::channel::<()>();
+
+        let renderer = async move {
+            let current = format!("{}/target", std::env!("CARGO_MANIFEST_DIR"));
+            let out_dir = format!("{current}/0.0.0.0");
+
+            if PathBuf::from(&out_dir).exists() {
+                println!("Removing old {out_dir}");
+                remove_dir_all(&out_dir).await?;
+            }
+            println!("Executing commands");
+            Command::new("suckit")
+                .args(format!("http://0.0.0.0:{port}/ -j 8 -o {current}",).split_whitespace())
+                .status()?;
+            Command::new("ruplacer")
+                .args(format!("index.html ./ {out_dir} --quiet --go").split_whitespace())
+                .status()?;
+            Command::new("ruplacer")
+                .args(
+                    format!(r#"(\.\./)+([a-z.]*)(\.com|\.me) https://$2$3 {out_dir} --quiet --go"#)
+                        .split_whitespace(),
+                )
+                .status()?;
+            Command::new("ruplacer")
+                .args(["index_no_slash.html", "", &out_dir, "--quiet", "--go"])
+                .status()?;
+            Command::new("ruplacer")
+                .args([r#"/\./""#, r#"/""#, &out_dir, "--quiet", "--go"])
+                .status()?;
+            Command::new("ruplacer")
+                .args([
+                    r#"syntax-([a-zA-Z]+)"#,
+                    "$0 dark:$0",
+                    &out_dir,
+                    "-t",
+                    "*.html",
+                    "--quiet",
+                    "--go",
+                ])
+                .status()?;
+            txs.send(()).unwrap();
+            Ok(())
+        };
+        set_return_type::<Result<()>, _>(&renderer);
+
         let a = tokio::spawn(renderer);
 
         let server =
-            Server::bind(&format!("127.0.0.1:{port}").parse()?).serve(app.into_make_service());
+            Server::bind(&format!("0.0.0.0:{port}").parse()?).serve(app.into_make_service());
 
         let graceful = server.with_graceful_shutdown(async move {
             println!("Starting Axum Server");
@@ -888,7 +970,7 @@ async fn main() -> Result<()> {
         a.await??;
         Ok(())
     } else {
-        Server::bind(&format!("127.0.0.1:{port}").parse()?)
+        Server::bind(&format!("0.0.0.0:{port}").parse()?)
             .serve(app.into_make_service())
             .await?;
         Ok(())
