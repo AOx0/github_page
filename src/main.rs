@@ -461,10 +461,10 @@ fn Blog(cx: Scope) -> impl IntoView {
                             <div
                                 class=
                                     "p-0 w-full flex items-center text-sm leading-6 text-gray-400 rounded-md ring-1 ring-gray-900/10
-                                    shadow-sm py-1.5 pl-2 pr-3 hover:ring-gray-300 dark:bg-gray-900/30 dark:highlight-white/5 dark:hover:bg-gray-800"
+                                    shadow-sm py-1.5 pl-2 pr-3 bg-white dark:bg-gray-900/30 md:dark:highlight-white/5 md:dark:hover:bg-gray-800"
                             >
                                 <svg width="24" height="24" fill="none" aria-hidden="true" class="mr-3 flex-none"><path d="m19 19-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></svg>
-                                <input x-model="search" type="search" class="search-input h-full grow !border-none !focus:ring-0 !outline-none relative bg-transparent" placeholder="Quick search..."/>
+                                <input style="-webkit-appearance: none; -webkit-border-radius:0px;" x-model="search" type="search" class="search-input h-full grow !border-none !focus:ring-0 !outline-none relative !bg-transparent rounded-none" placeholder="Quick search..."/>
                             </div>
                         </div>
                     </div>
