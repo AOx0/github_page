@@ -10,6 +10,9 @@ use axum::{
 use comrak::plugins::syntect::SyntectAdapter;
 use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
 use leptos::*;
+use pulldown_cmark::CodeBlockKind;
+use std::io::Write;
+use std::process::Stdio;
 use std::str::FromStr;
 use std::{fs::OpenOptions, path::PathBuf};
 use std::{io::Read, process::Command};
@@ -400,7 +403,7 @@ pub fn BlogEntryNutshell(
             </div>
             <a href=href>
                 <div class="flex justify-between items-center flex-row-revert">
-                    <h2 class="blog-title hover:text-orange-500 text-left">{title}</h2>
+                    <h2 class="blog-title font-bold text-lg pb-4 hover:text-orange-500 text-left">{title}</h2>
                 </div>
             </a>
             <a href=href>
@@ -470,7 +473,7 @@ fn Blog(cx: Scope) -> impl IntoView {
                     <H1>"Blog"</H1>
                 </div>
                 <div class="flex flex-col space-y-10 md:space-y-0">
-                    <BlogEntryNutshell href="./test/" title="Type guidance on APIs using PhantomData"
+                    <BlogEntryNutshell href="./type-guidance/" title="Type guidance on APIs using PhantomData"
                         tags=&[("Rust", "rust")]
                         date="2022-10-11"
                         des="When writing APIs it's easy for users to make
@@ -790,21 +793,104 @@ where
 
 #[component]
 fn MarkdownRenderer3(cx: Scope, file: PathBuf, title: String) -> impl IntoView {
-    use pulldown_cmark::{html, Parser};
+    use pulldown_cmark::html;
+    use pulldown_cmark::Event;
+    use pulldown_cmark::Options;
+    use pulldown_cmark::Parser;
+    use pulldown_cmark::Tag;
+
+    use std::io::Read;
+
     let mut file = OpenOptions::new().read(true).open(file).unwrap();
     let mut input = String::new();
 
     file.read_to_string(&mut input).unwrap();
 
-    let parser = Parser::new(&input);
+    let opts = Options::empty();
+    let mut s = String::new();
+    let p = Parser::new_ext(&input, opts);
 
-    let mut html_output = String::new();
-    html::push_html(&mut html_output, parser);
+    // We'll build a new vector of events since we can only consume the parser once
+    let mut new_p = Vec::new();
+    // As we go along, we'll want to highlight code in bundles, not lines
+    let mut to_highlight = String::new();
+    // And track a little bit of state
+    let mut in_code_block = false;
+    let mut lang = String::from_str("autodetect").unwrap();
+
+    for event in p {
+        match event {
+            Event::Start(Tag::CodeBlock(a)) => {
+                // In actual use you'd probably want to keep track of what language this code is
+                in_code_block = true;
+
+                if let CodeBlockKind::Fenced(a) = a {
+                    lang = String::from_utf8(a.as_bytes().to_owned()).unwrap();
+                    lang = lang.replace("mathematica", "Mathematica");
+                }
+            }
+            Event::End(Tag::CodeBlock(_)) => {
+                if in_code_block {
+                    // Format the whole multi-line code block as HTML all at once
+                    let mut child = Command::new("chroma")
+                        .args([
+                            &format!(r#"--lexer={}"#, lang),
+                            r#"--style=github-dark"#,
+                            r#"--html"#,
+                            r#"--html-only"#,
+                        ])
+                        .stdin(Stdio::piped())
+                        .stdout(Stdio::piped())
+                        .spawn()
+                        .unwrap();
+
+                    let child_stdin = child.stdin.as_mut().unwrap();
+                    child_stdin.write_all(&to_highlight.as_bytes()).unwrap();
+                    drop(child_stdin);
+
+                    let output = child.wait_with_output().unwrap();
+
+                    let mut child = Command::new("ruplacer")
+                        .args([r#"class="([a-zA-Z0-9]+)""#, r#"class="dark:$1 $1""#, r"-"])
+                        .stdin(Stdio::piped())
+                        .stdout(Stdio::piped())
+                        .spawn()
+                        .unwrap();
+
+                    let child_stdin = child.stdin.as_mut().unwrap();
+                    child_stdin.write_all(&output.stdout).unwrap();
+                    drop(child_stdin);
+
+                    let output = child.wait_with_output().unwrap();
+
+                    let html = String::from_utf8(output.stdout).unwrap();
+                    // And put it into the vector
+                    new_p.push(Event::Html(html.into()));
+                    to_highlight = String::new();
+                    in_code_block = false;
+                }
+            }
+            Event::Text(t) => {
+                if in_code_block {
+                    // If we're in a code block, build up the string of text
+                    to_highlight.push_str(&t);
+                } else {
+                    new_p.push(Event::Text(t))
+                }
+            }
+            e => {
+                new_p.push(e);
+            }
+        }
+    }
+
+    // Now we send this new vector of events off to be transformed into HTML
+    html::push_html(&mut s, new_p.into_iter());
 
     view! { cx,
-        <BaseHtml title=format!("{}{} - AOx0", &title.to_uppercase().chars().into_iter().next().unwrap(), &title[1..] ) katex=true blog=true>
+        <BaseHtml title=format!("{}{} - AOx0", &title.to_uppercase().chars().into_iter().next().unwrap(), &title[1..].to_owned().replace("-", " ") ) katex=true blog=true>
             <div class="max-w-screen-md relative container text-justify md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
-                {html_output.to_owned()}
+                {s.to_owned()}
             </div>
         </BaseHtml>
     }
@@ -847,7 +933,7 @@ fn MarkdownRenderer(cx: Scope, file: PathBuf, title: String) -> impl IntoView {
     let formatted = markdown_to_html_with_plugins(&input, &options, &plugins);
 
     view! { cx,
-        <BaseHtml title=format!("{} - AOx0", title.to_uppercase()) katex=true >
+        <BaseHtml title=format!("{} - AOx0", title.to_uppercase().replace("-", " ")) katex=true >
             <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
                 {formatted.to_owned()}
             </div>
@@ -871,7 +957,7 @@ async fn show_blog_entry(Path(name): Path<String>) -> Html<String> {
     let file = format!("{}/blog/{}.md", env!("CARGO_MANIFEST_DIR"), name);
     Html(render(move |cx| {
         view! {cx,
-            <MarkdownRenderer2
+            <MarkdownRenderer3
                 title=name
                 file=PathBuf::from_str(&file).unwrap()
             />
@@ -920,24 +1006,37 @@ async fn main() -> Result<()> {
                 remove_dir_all(&out_dir).await?;
             }
             println!("Executing commands");
+
+            println!("    Suckit");
             Command::new("suckit")
                 .args(format!("http://0.0.0.0:{port}/ -j 8 -o {current}",).split_whitespace())
                 .status()?;
+            println!("    Replace index.html -> ./");
             Command::new("ruplacer")
                 .args(format!("index.html ./ {out_dir} --quiet --go").split_whitespace())
                 .status()?;
+
+            println!("    Replace ../url.algo -> https://url.algo");
             Command::new("ruplacer")
                 .args(
-                    format!(r#"(\.\./)+([a-z.]*)(\.com|\.me) https://$2$3 {out_dir} --quiet --go"#)
-                        .split_whitespace(),
+                    format!(
+                        r#"(\.\./)+([a-z.]*)(\.com|\.me|\.net) https://$2$3 {out_dir} --quiet --go"#
+                    )
+                    .split_whitespace(),
                 )
                 .status()?;
+
+            println!("    Replace index_no_slash.html -> ");
             Command::new("ruplacer")
                 .args(["index_no_slash.html", "", &out_dir, "--quiet", "--go"])
                 .status()?;
+
+            println!("    Replace \"/./\" -> \"/\"");
             Command::new("ruplacer")
                 .args([r#"/\./""#, r#"/""#, &out_dir, "--quiet", "--go"])
                 .status()?;
+
+            println!("    Replace syntax-something -> dark:syntax-something syntax-something");
             Command::new("ruplacer")
                 .args([
                     r#"syntax-([a-zA-Z]+)"#,

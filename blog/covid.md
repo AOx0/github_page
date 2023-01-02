@@ -1,9 +1,3 @@
-
-
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-
 # Data analysis exercise: <br/> COVID-19 in México
 
 ### Abstract
@@ -13,7 +7,7 @@ The purpose, to strengthen my general analysis skills, practicing methods used t
 Seven minutes read.
 
 ### Regarding the data
-The CSV<a href="#f1">\( ^1 \)</a> was uploaded by José Héctor Paredes Martínez, Epidemiological Notification and Registry Director of the Secretaría de Salud at Mexico’s government.
+The CSV$ ^1 $ was uploaded by José Héctor Paredes Martínez, Epidemiological Notification and Registry Director of the Secretaría de Salud at Mexico’s government.
 Composed of 12,133,530 lines, the database contains a variety of information like death dates, gender, whether intubation was required, nationality, and more input which help get an idea of the situation in México.
 I manipulated the material with **Wolfram Mathematica** 13.0.0, fragmenting the rows with the rust crate, **split-csv**, into 101 smaller documents for easier processing.
 
@@ -30,11 +24,11 @@ All 12 million rows correspond to an individual visit to an attention unit. To 
 ```mathematica
 result = <||>
 Do[
-file = "~/Downloads/covid/covid_"<>ToString@file<>".csv";
-Print["Loading... "<>file];
-data = Import[file, {"CSV", "Dataset"}, "HeaderLines"->1];
-dates = Counts[Normal@data[All, "FECHA_INGRESO"]];
-result = Merge[{result, dates}, Total],
+	file = "~/Downloads/covid/covid_"<>ToString@file<>".csv";
+	Print["Loading... "<>file];
+	data = Import[file, {"CSV", "Dataset"}, "HeaderLines"->1];
+	dates = Counts[Normal@data[All, "FECHA_INGRESO"]];
+	result = Merge[{result, dates}, Total],
 {file, 1, 101}]
 
 dates = Flatten /@ List @@@ Normal @ result;
@@ -45,15 +39,15 @@ Dplot[dates]
 
 Overall, it plots an association that packs the engineered data for each file.
 
-Achieved by creating an empty association filled with the outcomes of a process that is executed \( n \)  times when \( n \)   is the quantity of archives with the CSV form. 
+Achieved by creating an empty association filled with the outcomes of a process that is executed $ n $  times when $ n $   is the quantity of archives with the CSV form. 
 
-The process formats \( n \)  with a hardcoded path to open a file and load it into a dataset.
+The process formats $ n $  with a hardcoded path to open a file and load it into a dataset.
 
 To prepare the information, it declares a list containing the values of the column **FECHA\_INGRESO**, counts the number of occurrences of the values, stores the result to **date** and, using **Merge** with **Total** , appends **dates** to **results**, merging the new dates as new keys or adding their values for already existing keys.
 
 Finally, it transforms the association into a matrix of two columns, formatting the dates, for them to be objects instead of strings and be able to plot the matrix with the custom function **Dplot**.
 
-![](Ingresos.png)
+![](/static/blog/covid/Ingresos.png)
 ###### Figure 1: Daily people registration over time
 
 <br/>**Confirmed cases**
@@ -63,21 +57,26 @@ By implementing an algorithm almost identical to the first one, but changing the
 ```mathematica
 PerformForEach["~/Downloads/covid", <|
 Pre -> ((
-	result = <||>;
+	result = <| |>;
 )&),
 Code -> ((
-	datesCovid = Counts[Normal@#Data[Select[#"CLASIFICACION_FINAL" == 3 &], "FECHA_INGRESO"]];
+	datesCovid = Counts[
+		Normal@#Data[Select[#"CLASIFICACION_FINAL" == 3 &], "FECHA_INGRESO"]
+	];
 	result = Merge[{result, datesCovid}, Total];
 )&),
 Pos -> ((
 	datesCovid = Flatten /@ List @@@ Normal @ result;
-	Do[datesCovid[[n]][[1]] = FromDateString[datesCovid[[n]][[1]]], {n, 1, Length[datesCovid]}];
+	Do[
+		datesCovid[[n]][[1]] = FromDateString[datesCovid[[n]][[1]]],
+		{n, 1, Length[datesCovid]}
+	];
 	Print@Dplot[datesCovid];
 )&)
 |>];
 ```
 
-![](Confirmados.png)
+![](/static/blog/covid/Confirmados.png)
 ###### Figure 2: Confirmed COVID-19 cases over time
 
 <br/>**Confirmed vs. Total**
@@ -88,7 +87,7 @@ To get a better understanding of what is happening on both plots it’s necessar
 Show[Dplot@dates, Dplot[datesCovid, PlotStyle->Darker@Red]]
 ```
 
-![](TotalVSConf.png)
+![](/static/blog/covid/TotalVSConf.png)
 ###### Figure 3: Total attendance registration and confirmed cases per day over time
 
 Taking a look at **Figure 3**, there appears to be a relation between the number of Mexicans attending sanity barracks and confirmed cases over time, which may evidence that COVID-19 “waves” are merely indicators of individuals presenting to treatment and diagnosis stations —maybe due to paranoia— and not because of the presence of actually a lot of infected.
@@ -101,7 +100,10 @@ To accomplish this, more code is needed. Since the arrays extracted from the dat
 
 ```mathematica
 rawdatesqc = {};
-Do[AppendTo[rawdatesqc, e[[2]]],  {e, SortBy[datesCovid, AbsoluteTime[#[[1]]] &]}];
+Do[
+	AppendTo[rawdatesqc, e[[2]]],  
+	{e, SortBy[datesCovid, AbsoluteTime[#[[1]]] &]}
+];
 rawdatesqc = PrependTo[rawdatesqc, Table[0, 31+29]];
 rawdatesqc = Flatten[rawdatesqc];
 ```
@@ -118,7 +120,15 @@ Then we get the area of the number of people registered at an attendance center 
 ```mathematica
 percentPerDate = {};
 percents = N[rawdatesqc/rawdatesq * 100];
-Do[percentPerDate = AppendTo[percentPerDate, {SortBy[dates, AbsoluteTime[#[[1]]] &][[i]][[1]], percents[[i]]}], {i, 1, Length[rawdatesq]}];
+Do[percentPerDate = AppendTo[
+	percentPerDate, 
+	{
+		SortBy[dates, 
+			AbsoluteTime[#[[1]]] &][[i]][[1]], 
+			percents[[i]]
+	}], 
+{i, 1, Length[rawdatesq]}
+];
 ```
 
 Finally, declare an array, populating it with the result of the division of confirmed by total of every index and prepend its corresponding day.
@@ -127,7 +137,7 @@ Finally, declare an array, populating it with the result of the division of conf
 Dplot[percentPerDate, Filling->Top, YRange->{0,100}]
 ```
 
-![](Percent.png)
+![](/static/blog/covid/Percent.png)
 ###### Figure 4: Percent of confirmed cases per number of registrations over time
 
 From this perspective, there appears to be two COVID-19 waves instead of three as displayed in **Figure 3**.
@@ -143,8 +153,14 @@ Pre -> ((
 )&),
 Code -> ((
 	Do[
-		entity = Counts[Normal@#Data[Select[#"CLASIFICACION_FINAL" == 3 && #"ENTIDAD_UM" == en &], "FECHA_INGRESO"] ];
-		If [KeyExistsQ[result, en], result[en] = Merge[{result[en], entity}, Total], result[en] = entity];
+		entity = Counts[
+			Normal@#Data[Select[#"CLASIFICACION_FINAL" == 3 && #"ENTIDAD_UM" == en &], 
+			"FECHA_INGRESO"]
+		];
+		If [ KeyExistsQ[result, en],
+				result[en] = Merge[{result[en], entity}, Total], 
+			result[en] = entity
+		];
 	,{en, 1, 32}]
 )&),
 Pos -> ((
@@ -152,7 +168,10 @@ Pos -> ((
 	plots = {};
 	Do[
 		entity[en] = Flatten /@ List @@@ Normal @ result[en];
-		Do[entity[en][[n]][[1]] = FromDateString[entity[en][[n]][[1]]], {n, 1, Length[entity[en]]}];
+		Do[
+			entity[en][[n]][[1]] = FromDateString[entity[en][[n]][[1]]], 
+			{n, 1, Length[entity[en]]}
+		];
 		plots = AppendTo[plots, Dplot[entity[en]]];
 	,{en, 1, 32}]
 )&)
@@ -172,11 +191,11 @@ Result which can be utilized to generate various graphics. For example, employin
 
 ```mathematica
 PieFromTotal[
-totalN,
-{quantity1, quantity2, ...},
-{legend1_q1, legend_q2, ...},
+	totalN,
+	{quantity1, quantity2, ...},
+	{legend1q1, legendq2, ...},
 
-Options
+	Options
 ]
 ```
 
@@ -202,7 +221,7 @@ SectorOrigin -> {{Pi/12, "Counterclockwise"}, 1}
 
 The code displayed at **Figure 5** generates the output:
 
-![](TodosEstados.png)
+![](/static/blog/covid/TodosEstados.png)
 ###### Figure 6: Pie chart of total confirmed cases per administrative division
 
 **Figure 6** shows a disproportionate value that corresponds to Mexico City when compared to the reported values of the rest of the Mexico’s states. **Figure 7** confirms this point.
@@ -211,18 +230,18 @@ The following code generated **Figure 7**.
 
 ```mathematica
 RectangleChart[
-{Table[{10, Sum[e[[2]], {e, entity[en]}]}, {en, 1, 32}]},
-ChartLabels -> Placed[estados, Above],
-ImageSize 	-> Full,
-LabelStyle 	-> Directive[20]
+	{Table[{10, Sum[e[[2]], {e, entity[en]}]}, {en, 1, 32}]},
+	ChartLabels -> Placed[estados, Above],
+	ImageSize 	-> Full,
+	LabelStyle 	-> Directive[20]
 ]
 ```
 
-![](TodosEstadosRect.png)
+![](/static/blog/covid/TodosEstadosRect.png)
 ###### Figure 7: Rectangle chart of total confirmed cases per administrative division
 
 
-<br/>** Percent of confirmed cases per state**
+<br/>**Percent of confirmed cases per state**
 
 An alternative, once again, is to generate a plot that displays percent of confirmed Covid cases per state based on the information that is displayed in **Figure 8**, generated by the code above it. 
 
@@ -249,32 +268,36 @@ RectangleChart[
 },  ImageSize->Full]
 ```
 
-![](TodosEstadosRectVSCasos.png)
+![](/static/blog/covid/TodosEstadosRectVSCasos.png)
 ###### Figure 8: Total and confirmed cases per state
 
 A very similar code generated **Figure 9**.  From the perspective of the chart, according to the data, Mexico City is not the state with the worst ratio, it is Oaxaca is.
 
-![](TodosEstadosRectPercent.png)
+![](/static/blog/covid/TodosEstadosRectPercent.png)
 ###### Figure 9: Percent of confirmed cases per state
 
 The ratio probably does not display the real situation.  Keep in mind that this data depends on the number of people that did visit a COVID-19 Stations, there are people that, even though they got symptoms, don’t go to the medic nor to attention units. As shown in a report from the México’s government, where it’s indicated that the optimal occupancy percentage is 90%, but the average of the county is approximately 76%, with places like Campeche with only 56.4%.  I indeed do know many people who do not attend to health centers. 
 
 > In general, a value between 85% and 90% is identified as the optimal level of the indicator.
 > In 2014, the national occupancy percentage was 75.8% (…). The result obtained is close to 10 percentage points below the expected level.
-> (Informe sobre la Salud de los Mexicanos, 2016, p. 106)<a href="#f2">\( ^2 \)</a>
+> (Informe sobre la Salud de los Mexicanos, 2016, p. 106)<a href="#f2">$ ^2 $</a>
 
 Whether people attend to hospitals or not is out of the scope of this writeup.
 
-<br/>** Sorting the percent of confirmed cases per state**
+<br/>**Sorting the percent of confirmed cases per state**
 
 Next, let’s sort the charts in **Figure 9** with the following code:
 ```mathematica
-sortedStates = SortBy[Table[{en, confirmed/total * 100}, {en, 1, 32}], ( #[[2]] &)]
+sortedStates = SortBy[
+	Table[{en, confirmed/total * 100},
+	{en, 1, 32}],
+	( #[[2]] &)
+]
 ```
 
 In which we specify `( #[[2]] &) `, hence, sort the matrix with the value in the second index of each list in the matrix.
 
-![](TodosEstadosRectPercentSorted.png)
+![](/static/blog/covid/TodosEstadosRectPercentSorted.png)
 ###### Figure 10: Percent of confirmed cases per state, sorted from greatest to lowest 
 
 
@@ -283,5 +306,5 @@ Mathematica is a great software where we can easily analyze huge amounts of data
 
 ## References
 
-<p id="f1"/>1.- Martínez, J. (2020-08-06) *”Información Referente a Casos Covid-19 En México”*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
-<p id="f2"/>2.- Secretaría de Salud. (2016). *”Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud”*. Retrieved from [https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM\_2016.pdf](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.
+1- Martínez, J. (2020-08-06) *"Información Referente a Casos Covid-19 En México"*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
+2- Secretaría de Salud. (2016). *"Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud"*. Retrieved from [https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM\_2016.pdf](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.
