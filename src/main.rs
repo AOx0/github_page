@@ -475,7 +475,7 @@ fn Blog(cx: Scope) -> impl IntoView {
                 <div class="flex flex-col space-y-10 md:space-y-0">
                     <BlogEntryNutshell href="./type-guidance/" title="Type guidance on APIs using PhantomData"
                         tags=&[("Rust", "rust")]
-                        date="2022-10-11"
+                        date="2022-08-06"
                         des="When writing APIs it's easy for users to make
                         misuses of methods defined within a struct. There are 
                         cases when you might want to restrict the methods available 
@@ -484,7 +484,7 @@ fn Blog(cx: Scope) -> impl IntoView {
                     />
                     <BlogEntryNutshell href="./covid/" title="Data analysis exercise: COVID19 in México"
                         tags=&[("Mathematica", "mathematica")]
-                        date="2022-10-11"
+                        date="2021-12-25"
                         des="COVID-19 reached every place on the earth.
                         An examination of open data from México will reveal the situation there. 
                         This paper aims to describe it by showing plenty of plots and graphs, 

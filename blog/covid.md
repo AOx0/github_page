@@ -280,6 +280,7 @@ The ratio probably does not display the real situation.  Keep in mind that this 
 
 > In general, a value between 85% and 90% is identified as the optimal level of the indicator.
 > In 2014, the national occupancy percentage was 75.8% (…). The result obtained is close to 10 percentage points below the expected level.
+> 
 > (Informe sobre la Salud de los Mexicanos, 2016, p. 106)<a href="#f2">$ ^2 $</a>
 
 Whether people attend to hospitals or not is out of the scope of this writeup.
@@ -306,5 +307,5 @@ Mathematica is a great software where we can easily analyze huge amounts of data
 
 ## References
 
-1- Martínez, J. (2020-08-06) *"Información Referente a Casos Covid-19 En México"*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
-2- Secretaría de Salud. (2016). *"Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud"*. Retrieved from [https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM\_2016.pdf](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.
+1. Martínez, J. (2020-08-06) *"Información Referente a Casos Covid-19 En México"*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
+2. Secretaría de Salud. (2016). *"Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud"*. Retrieved from [https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM\_2016.pdf](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.

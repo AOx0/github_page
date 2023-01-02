@@ -199,11 +199,19 @@ h5 {
 }
 
 h6 {
-    @apply text-sm !text-center py-2;
+    @apply text-sm !text-center pb-5;
 }
 
 img {
-    @apply !text-center py-5;
+    @apply !text-center my-5 rounded-lg;
+}
+
+blockquote {
+    @apply grid border-l text-gray-800 border-gray-800 text-justify italic dark:border-gray-300 dark:text-gray-300;
+}
+
+blockquote > p {
+    @apply pl-5 md:pl-10 text-justify italic;
 }
 
 .blog-title {
