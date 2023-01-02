@@ -147,4 +147,4 @@ Thus, the unit types used on the implementation do not impact the final binary, 
 
 ## Sources
 1. Gjengset, J. (2022) *"Rust for Rustaceans: Idiomatic Programming for Experienced Developers"*. No Starch Press.
-2. Doc.Rust-Lang. *"Struct std::marker::PhantomData"*. Retrieved from [**https://doc.rust-lang.org/std/marker/struct.PhantomData.html**](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) on July 6, 2022.
+2. Doc.Rust-Lang. *"Struct std::marker::PhantomData"*. Retrieved from [**doc.rust-lang.org**](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) on July 6, 2022.

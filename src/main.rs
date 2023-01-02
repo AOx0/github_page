@@ -524,7 +524,7 @@ fn Welcome(cx: Scope) -> impl IntoView {
 fn Terms(cx: Scope) -> impl IntoView {
     view! {cx,
         <BaseHtml title="Terms - AOx0".to_owned()>
-            <div class="max-w-screen-md relative container text-center md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
+            <div class="max-w-screen-md relative container text-justify v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
                 <H1>"Terms of Service"</H1>
                 <p class="text-justify">
                     r#"
@@ -543,70 +543,16 @@ fn Terms(cx: Scope) -> impl IntoView {
                         except as expressly permitted on this website; or (d) use this website other than for its intended purpose.
                     "#
 
-                    <div class="block md:hidden">
-                        <H3>"2. Open-Source Software"</H3>
-                        "This website includes the following open-source softwares that are all distributed under the MIT license: Leptos "
-                            <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"(https://github.com/gbj/leptos)"</a>
-                        ", AlpineJS "
-                            <a href="https://github.com/alpinejs/alpine" class="text-blue-500 hover:underline">"(https://github.com/alpinejs/alpine)"</a>
-                        ", TailwindCSS "
-                            <a href="https://github.com/tailwindlabs/tailwindcss" class="text-blue-500 hover:underline">"(https://github.com/tailwindlabs/tailwindcss)"</a>
-                        " and Chroma "
-                            <a href="https://github.com/alecthomas/chroma" class="text-blue-500 hover:underline">"(https://github.com/alecthomas/chroma)"</a>
-                    </div>
-                    <div class="hidden md:block">
                     <H3>"2. Open-Source Software"</H3>
-                    r#"
-                        This website includes the following open-source softwares, distributed under the specified licenses:
-                    "#
-                    <br/>
-
-                    <table class="w-full border-collapse text-sm py-10">
-                      <thead>
-                        <tr class="text-xs font-semibold uppercase tracking-wider">
-                          <th class="px-4 py-2">"Project Name"</th>
-                          <th class="px-4 py-2">"Project Licenses"</th>
-                          <th class="px-4 py-2">"Chosen License"</th>
-                          <th class="px-4 py-2">"Project Repository"</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
-                          <td class="px-4 py-2">"AlpineJS"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">
-                            <a href="https://github.com/alpinejs/alpine" class="text-blue-500 hover:underline">"https://github.com/alpinejs/alpine"</a>
-                          </td>
-                        </tr>
-                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
-                          <td class="px-4 py-2">"TailwindCSS"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">
-                            <a href="https://github.com/tailwindlabs/tailwindcss" class="text-blue-500 hover:underline">"https://github.com/tailwindlabs/tailwindcss"</a>
-                          </td>
-                        </tr>
-                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
-                          <td class="px-4 py-2">"Leptos"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">
-                            <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"https://github.com/gbj/leptos"</a>
-                          </td>
-                        </tr>
-                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
-                          <td class="px-4 py-2">"Chroma"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">"MIT"</td>
-                          <td class="px-4 py-2">
-                            <a href="https://github.com/alecthomas/chroma" class="text-blue-500 hover:underline">"https://github.com/alecthomas/chroma"</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    </div>
-
+                    "This website includes the following open-source softwares that are all distributed under the MIT license: Leptos ("
+                        <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"https://github.com/gbj/leptos"</a>
+                    "), AlpineJS ("
+                        <a href="https://github.com/alpinejs/alpine" class="text-blue-500 hover:underline">"https://github.com/alpinejs/alpine"</a>
+                    "), TailwindCSS ("
+                        <a href="https://github.com/tailwindlabs/tailwindcss" class="text-blue-500 hover:underline">"https://github.com/tailwindlabs/tailwindcss"</a>
+                    ") and Chroma ("
+                        <a href="https://github.com/alecthomas/chroma" class="text-blue-500 hover:underline">"https://github.com/alecthomas/chroma"</a>
+                    ")"
                     <br/>
                     r#"
                         By using this website, you agree to be bound by the terms of the applicable open-source software licenses.

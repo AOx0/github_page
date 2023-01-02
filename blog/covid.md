@@ -307,5 +307,5 @@ Mathematica is a great software where we can easily analyze huge amounts of data
 
 ## References
 
-1. Martínez, J. (2020-08-06) *"Información Referente a Casos Covid-19 En México"*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [**https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico**](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
-2. Secretaría de Salud. (2016). *"Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud"*. Retrieved from [**https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM\_2016.pdf**](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.
+1. Martínez, J. (2020-08-06) *"Información Referente a Casos Covid-19 En México"*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [**datos.gob.mx**](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
+2. Secretaría de Salud. (2016). *"Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud"*. Retrieved from [**www.gob.mx**](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.
