@@ -47,7 +47,7 @@ To prepare the information, it declares a list containing the values of the colu
 
 Finally, it transforms the association into a matrix of two columns, formatting the dates, for them to be objects instead of strings and be able to plot the matrix with the custom function **Dplot**.
 
-![](/static/blog/covid/Ingresos.png)
+![Figure 1: Daily people registration over time](/static/blog/covid/Ingresos.png)
 ###### Figure 1: Daily people registration over time
 
 <br/>**Confirmed cases**
@@ -76,7 +76,7 @@ Pos -> ((
 |>];
 ```
 
-![](/static/blog/covid/Confirmados.png)
+![Figure 2: Confirmed COVID-19 cases over time](/static/blog/covid/Confirmados.png)
 ###### Figure 2: Confirmed COVID-19 cases over time
 
 <br/>**Confirmed vs. Total**
@@ -87,7 +87,7 @@ To get a better understanding of what is happening on both plots it’s necessar
 Show[Dplot@dates, Dplot[datesCovid, PlotStyle->Darker@Red]]
 ```
 
-![](/static/blog/covid/TotalVSConf.png)
+![Figure 3: Total attendance registration and confirmed cases per day over time](/static/blog/covid/TotalVSConf.png)
 ###### Figure 3: Total attendance registration and confirmed cases per day over time
 
 Taking a look at **Figure 3**, there appears to be a relation between the number of Mexicans attending sanity barracks and confirmed cases over time, which may evidence that COVID-19 “waves” are merely indicators of individuals presenting to treatment and diagnosis stations —maybe due to paranoia— and not because of the presence of actually a lot of infected.
@@ -137,7 +137,7 @@ Finally, declare an array, populating it with the result of the division of conf
 Dplot[percentPerDate, Filling->Top, YRange->{0,100}]
 ```
 
-![](/static/blog/covid/Percent.png)
+![Figure 4: Percent of confirmed cases per number of registrations over time](/static/blog/covid/Percent.png)
 ###### Figure 4: Percent of confirmed cases per number of registrations over time
 
 From this perspective, there appears to be two COVID-19 waves instead of three as displayed in **Figure 3**.
@@ -221,7 +221,7 @@ SectorOrigin -> {{Pi/12, "Counterclockwise"}, 1}
 
 The code displayed at **Figure 5** generates the output:
 
-![](/static/blog/covid/TodosEstados.png)
+![Figure 6: Pie chart of total confirmed cases per administrative division](/static/blog/covid/TodosEstados.png)
 ###### Figure 6: Pie chart of total confirmed cases per administrative division
 
 **Figure 6** shows a disproportionate value that corresponds to Mexico City when compared to the reported values of the rest of the Mexico’s states. **Figure 7** confirms this point.
@@ -237,7 +237,7 @@ RectangleChart[
 ]
 ```
 
-![](/static/blog/covid/TodosEstadosRect.png)
+![Figure 7: Rectangle chart of total confirmed cases per administrative division](/static/blog/covid/TodosEstadosRect.png)
 ###### Figure 7: Rectangle chart of total confirmed cases per administrative division
 
 
@@ -268,12 +268,12 @@ RectangleChart[
 },  ImageSize->Full]
 ```
 
-![](/static/blog/covid/TodosEstadosRectVSCasos.png)
+![Figure 8: Total and confirmed cases per state](/static/blog/covid/TodosEstadosRectVSCasos.png)
 ###### Figure 8: Total and confirmed cases per state
 
 A very similar code generated **Figure 9**.  From the perspective of the chart, according to the data, Mexico City is not the state with the worst ratio, it is Oaxaca is.
 
-![](/static/blog/covid/TodosEstadosRectPercent.png)
+![Figure 9: Percent of confirmed cases per state](/static/blog/covid/TodosEstadosRectPercent.png)
 ###### Figure 9: Percent of confirmed cases per state
 
 The ratio probably does not display the real situation.  Keep in mind that this data depends on the number of people that did visit a COVID-19 Stations, there are people that, even though they got symptoms, don’t go to the medic nor to attention units. As shown in a report from the México’s government, where it’s indicated that the optimal occupancy percentage is 90%, but the average of the county is approximately 76%, with places like Campeche with only 56.4%.  I indeed do know many people who do not attend to health centers. 
@@ -298,7 +298,7 @@ sortedStates = SortBy[
 
 In which we specify `( #[[2]] &) `, hence, sort the matrix with the value in the second index of each list in the matrix.
 
-![](/static/blog/covid/TodosEstadosRectPercentSorted.png)
+![Figure 10: Percent of confirmed cases per state, sorted from greatest to lowest](/static/blog/covid/TodosEstadosRectPercentSorted.png)
 ###### Figure 10: Percent of confirmed cases per state, sorted from greatest to lowest 
 
 
@@ -307,5 +307,5 @@ Mathematica is a great software where we can easily analyze huge amounts of data
 
 ## References
 
-1. Martínez, J. (2020-08-06) *"Información Referente a Casos Covid-19 En México"*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
-2. Secretaría de Salud. (2016). *"Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud"*. Retrieved from [https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM\_2016.pdf](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.
+1. Martínez, J. (2020-08-06) *"Información Referente a Casos Covid-19 En México"*. https://www.gob.mx/salud: Secretaría de Salud. Retrieved from [**https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico**](https://datos.gob.mx/busca/dataset/informacion-referente-a-casos-covid-19-en-mexico) on December 16, 2021.
+2. Secretaría de Salud. (2016). *"Informe sobre la Salud de los Mexicanos 2016:  Diagnóstico General del Sistema Nacional de Salud"*. Retrieved from [**https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM\_2016.pdf**](https://www.gob.mx/cms/uploads/attachment/file/239410/ISSM_2016.pdf) on January 7, 2022.

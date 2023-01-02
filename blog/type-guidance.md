@@ -11,6 +11,7 @@ It might be tempting to define a member like an enum or a boolean and use it as 
 
 Rust provides `std::marker::PhantomData` which has a variety of uses. In this writeup, we will use it to implement specific methods for each stage of a structure by using unit types as stage markers.
 
+This is an exercise of the section *"Type System Guidance"* at Chapter 3 of Jon Gjengset's *"Rust for Rustaceans"* excellent book.
 
 First, bring into scope `std::marker::PhantomData`.
 
@@ -146,4 +147,4 @@ Thus, the unit types used on the implementation do not impact the final binary, 
 
 ## Sources
 1. Gjengset, J. (2022) *"Rust for Rustaceans: Idiomatic Programming for Experienced Developers"*. No Starch Press.
-2. Doc.Rust-Lang. *"Struct std::marker::PhantomData"*. Retrieved from [https://doc.rust-lang.org/std/marker/struct.PhantomData.html](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) on July 6, 2022.
+2. Doc.Rust-Lang. *"Struct std::marker::PhantomData"*. Retrieved from [**https://doc.rust-lang.org/std/marker/struct.PhantomData.html**](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) on July 6, 2022.

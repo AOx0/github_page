@@ -596,7 +596,8 @@ fn Terms(cx: Scope) -> impl IntoView {
 
                     <H3>"3. Cookie Policy"</H3>
                     r#"
-                        This website uses cookies to improve the user experience. These cookies do not collect any personal information or track your browsing activity. They are used solely for the purpose of providing a better user experience on this website. By using this website, you consent to the use of cookies.
+                        This website uses cookies to improve the user experience, specifically to track theme preferences. 
+                        These cookies do not collect any personal information nor track your browsing activity. They are used solely for the purpose of providing a better user experience on this website. By using this website, you consent to the use of cookies.
                     "#
 
                     <H3>"4. Intellectual Property"</H3>
@@ -1020,7 +1021,7 @@ async fn main() -> Result<()> {
             Command::new("ruplacer")
                 .args(
                     format!(
-                        r#"(\.\./)+([a-z.]*)(\.com|\.me|\.net) https://$2$3 {out_dir} --quiet --go"#
+                        r#"(\.\./)+([a-zA-Z\-\.]+)(\.com|\.me|\.net|\.org|\.mx)/ https://$2$3/ {out_dir} --quiet --go"#
                     )
                     .split_whitespace(),
                 )
