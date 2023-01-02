@@ -543,9 +543,21 @@ fn Terms(cx: Scope) -> impl IntoView {
                         except as expressly permitted on this website; or (d) use this website other than for its intended purpose.
                     "#
 
+                    <div class="block md:hidden">
+                        <H3>"2. Open-Source Software"</H3>
+                        "This website includes the following open-source softwares that are all distributed under the MIT license: Leptos "
+                            <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"(https://github.com/gbj/leptos)"</a>
+                        ", AlpineJS "
+                            <a href="https://github.com/alpinejs/alpine" class="text-blue-500 hover:underline">"(https://github.com/alpinejs/alpine)"</a>
+                        ", TailwindCSS "
+                            <a href="https://github.com/tailwindlabs/tailwindcss" class="text-blue-500 hover:underline">"(https://github.com/tailwindlabs/tailwindcss)"</a>
+                        " and Chroma "
+                            <a href="https://github.com/alecthomas/chroma" class="text-blue-500 hover:underline">"(https://github.com/alecthomas/chroma)"</a>
+                    </div>
+                    <div class="hidden md:block">
                     <H3>"2. Open-Source Software"</H3>
                     r#"
-                        This website includes the following open-source software, which is distributed under the specified licenses:
+                        This website includes the following open-source softwares, distributed under the specified licenses:
                     "#
                     <br/>
 
@@ -583,8 +595,17 @@ fn Terms(cx: Scope) -> impl IntoView {
                             <a href="https://github.com/gbj/leptos" class="text-blue-500 hover:underline">"https://github.com/gbj/leptos"</a>
                           </td>
                         </tr>
+                        <tr class="dark:odd:bg-gray-900/30 odd:bg-gray-100">
+                          <td class="px-4 py-2">"Chroma"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">"MIT"</td>
+                          <td class="px-4 py-2">
+                            <a href="https://github.com/alecthomas/chroma" class="text-blue-500 hover:underline">"https://github.com/alecthomas/chroma"</a>
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
+                    </div>
 
                     <br/>
                     r#"
