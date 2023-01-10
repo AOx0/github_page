@@ -9,15 +9,14 @@ There are many approaches to parsing, and parser combinators are one powerful an
 Scott explains what parser combinators are and how they work. 
 He starts by looking at the basics of simple parsers that can match individual characters or patterns in input data. 
 From there, he expands on combinator functions to compose parsers into more complex ones. 
-This essay, will take a very close approach to Scott, building over his slides my implementation with explanations about the code.
+This essay will take a very close approach to Scott, building over his slides and my implementation with explanations about the code.
 
 ## Parsing a single character
 
-Lets start by creating a simple parser that matches the character `'A'`. 
+Let us start by creating a simple parser that matches the character `'A'`. 
 
 First, we will need an enumerator for returning errors. The code is self-explanatory. 
-
-There are two edge cases that cause failure; either we have an empty input string, or the character we are matching against (`'A'`) is not present in the place we expect it to be within the input chars.
+Two edge cases cause failure; either we have an empty input string, or the character we are matching against (`'A'`) is not present in the place we expect it to be within the input chars.
 
 ```rust
 enum ParserError<'a> {
@@ -26,7 +25,7 @@ enum ParserError<'a> {
 }
 ```
 
-Then we have a parser function `pcharA`, which verifies if the first character of the string being inputted matches the character `'A'` and returns the remaining slice from the original input if successful.
+Then we have a parser function `pcharA`, which verifies if the first character matches with `'A'` and returns the remaining slice from the original input if successful.
 
 ```rust
 fn pcharA(input: &str) -> Result<&str, ParserError> {
@@ -58,7 +57,7 @@ As for now, we can visually see this function as a microchip with one input pin 
 
 The next update is to make this code accept any character `match_char` to parse. 
 
-The update demands us to update the error enumerator to include more information, what character expects and what it found.
+The update demands we update the error enumerator to include more information, what the character expects, and what it found.
 
 ```rust
 #[derive(Debug)]
@@ -68,14 +67,14 @@ enum ParserError {
 }
 ```
 
-The function is no longer named `pcharA` in accordance the function ability to parse any given char from any given string input.
+The function is no longer named `pcharA` per the function's ability to parse any given char from any given string input.
 
 ```rust
 fn pchar(input: &str, match_char: char) -> Result<(char, &str), ParserError> {
     if input.is_empty() {
         Err(ParserError::EmptyInput)
     } 
-	// The only difference is now we match the input character
+	// The only difference is that it matches the input character
 	else if input.chars().nth(0).expect("Unexpected empty str") == match_char {
         Ok((match_char, &input[1..]))
     } else {
@@ -149,7 +148,7 @@ Instead of having a function that takes a character to match while parsing, we a
 
 To fully understand this, let us take a closer look at the concept of function-builder functions. A function-builder function is a function that creates and returns another function. It takes one or more arguments, and the function that gets returned is *bound* to those arguments.
 
-Within Rust, as with many other languages, we have a concept named *closure* A closure is an anonymous function that we can bind to variables and pass as an argument to another functions. In the parser world, and thanks to functional programming languages, this allows us to make complex combinations of small closures to create complex parsing systems with ease.
+Within Rust, as with many other languages, we have a concept named *closure* A closure is an anonymous function that we can bind to variables and pass as an argument to other functions. In the parser world, and thanks to functional programming languages, this allows us to make complex combinations of small closures to create complex parsing systems with ease.
 
 With this in mind, `pchar` is now becoming a function-builder function that looks something like this:
 
@@ -159,11 +158,13 @@ Hence, `pchar` is a closure builder. The resulting closure looks:
 
 ![](/static/blog/wlaschin-parser-combinators/finput.png)
 
-Another way to see this new paradigm is to interpret `pchar` as a function factory that *records* in metal the character the function is building will match.
+Another way to see this new paradigm is to interpret `pchar` as a function factory that *records* in metal that the character the function is building will match.
 
 ![](/static/blog/wlaschin-parser-combinators/funcfactory.png)
 
-Note how `match_char` got embedded in the closure and thus no longer required as one of the closure inputs, allowing us to *wire* together various parser functions to create more complex parsers, similar as wiring together microchips together to build computers.
+ TODO: FINISH THIS  
+
+Note how `match_char` got embedded in the closure and thus no longer required as one of the closure inputs, allowing us to *wire* together various parser functions to create more complex parsers, similar to wiring together microchips together to build computers.
 
 ![](/static/blog/wlaschin-parser-combinators/compose1.png)
 
@@ -186,17 +187,17 @@ fn pchar(match_char: char) -> impl Fn(&str) -> Result<(char, &str), ParserError>
 }
 ```
 
-I rewrote the function to be more functionally, continuing with the functional spirit of the paper as follows:
+I rewrote the function to be more functional, continuing with the functional spirit of the paper as follows:
 
 ```rust
 fn pchar(match_char: char) -> impl Fn(&str) -> Result<(char, &str), ParserError> {
     move |input| {
         input
-            .chars()
-            .next()
-            .ok_or_else(|| ParserError::EmptyInput)
-            .and_then(|ch| {
-                if ch == match_char {
+            .chars() // Get an iterator over the characters
+            .next() // Step to the next char (the first one)
+            .ok_or_else(|| ParserError::EmptyInput) // Yield error if empty
+            .and_then(|ch| { // Else, perform an action with the char (ch)
+                if ch == match_char { // If it matches
                     Ok((match_char, &input[1..]))
                 } else {
                     Err(ParserError::NotFound {
@@ -217,7 +218,7 @@ fn pchar(..) -> impl Fn(&str) -> Result<(char, &str), ParserError>
 
 The `impl` part means we are dealing with the Rust trait system. `pchar` returns a value that complies with being a function with an immutable state with a string slice (`&str`) as input and a `Result` with specific types for error and ok statuses as its output.
 
-Within the function we return a closure. This closure, as the signature implies, takes an `input` and returns `Result<(char, &str), ParserError>` from its code block:
+Within the function, we return a closure. This closure, as the signature implies, takes an `input` and returns `Result<(char, &str), ParserError>` from its code block:
 
 ```rust
 move |input| { .. }
