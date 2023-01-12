@@ -3,6 +3,7 @@
 These are my notes from the lecture by Scott Wlaschin, available at [**YouTube**](https://www.youtube.com/watch?v=RDalzi7mhdY). 
 
 Scott uses F# at his slices, though I am not using F# but Rust, so I will rewrite as well as my ability permits to Rust code. 
+
 Parsing is a crucial task in computer science, as it allows us to process and interpret data that goes into our programs.
 There are many approaches to parsing, and parser combinators are one powerful and flexible tool for building parsers.
 
@@ -25,7 +26,7 @@ enum ParserError<'a> {
 }
 ```
 
-Then we have a parser function `pcharA`, which verifies if the first character matches with `'A'` and returns the remaining slice from the original input if successful.
+Then we have a parser function, `pcharA`, which verifies if the first character matches with `'A'` and returns the remaining slice from the original input if successful.
 
 ```rust
 fn pcharA(input: &str) -> Result<&str, ParserError> {
@@ -140,7 +141,7 @@ fn main() {
 The code above is an elementary example of a toy parser that looks for characters `{'A', 'B'}`.  
 When an unexpected char is encountered, the matching char changes to the other alternative, if the character is not `'A'` nor `'B'` then a panic occurs. The point here is we can loop over the remaining string to parse until we find an `Err(ParserError::EmptyInput)`, in which case we know the remaining string to parse is empty, and thus we have finished parsing.
 
-## Taking it purely functional
+## Taking it to purely functional
 
 Up to now, there is nothing strange about these two past functions, they are what we all expect them to be. Though, the next step turns up the thing to be more interesting. 
 
@@ -162,9 +163,7 @@ Another way to see this new paradigm is to interpret `pchar` as a function facto
 
 ![](/static/blog/wlaschin-parser-combinators/funcfactory.png)
 
- TODO: FINISH THIS  
-
-Note how `match_char` got embedded in the closure and thus no longer required as one of the closure inputs, allowing us to *wire* together various parser functions to create more complex parsers, similar to wiring together microchips together to build computers.
+Note how `match_char` got embedded in the closure and thus is no longer required as one of the closure inputs, allowing us to *wire* together various parser functions to create more complex parsers, similar to wiring microchips together to build computers.
 
 ![](/static/blog/wlaschin-parser-combinators/compose1.png)
 
@@ -187,7 +186,7 @@ fn pchar(match_char: char) -> impl Fn(&str) -> Result<(char, &str), ParserError>
 }
 ```
 
-I rewrote the function to be more functional, continuing with the functional spirit of the paper as follows:
+I rewrote the function to be more functional, continuing with the functional spirit of the paper, as follows:
 
 ```rust
 fn pchar(match_char: char) -> impl Fn(&str) -> Result<(char, &str), ParserError> {
@@ -197,7 +196,7 @@ fn pchar(match_char: char) -> impl Fn(&str) -> Result<(char, &str), ParserError>
             .next() // Step to the next char (the first one)
             .ok_or_else(|| ParserError::EmptyInput) // Yield error if empty
             .and_then(|ch| { // Else, perform an action with the char (ch)
-                if ch == match_char { // If it matches
+                if ch == match_char {
                     Ok((match_char, &input[1..]))
                 } else {
                     Err(ParserError::NotFound {
@@ -224,3 +223,105 @@ Within the function, we return a closure. This closure, as the signature implies
 move |input| { .. }
 ```
 
+There are two steps to use the code; create a parser function and call it with an input to parse.
+
+```rust
+fn main() {
+    println!("{:?}", pchar('A')("ABAABABA"));
+}
+```
+
+Or written in a longer form:
+
+```rust
+fn main() {
+	let parseA = pchar('A'); // Create a parse function
+	let result = parseA("ABAABABA") // Use the function
+    println!("{result:?}");
+}
+```
+
+To end this first functional stage, we will create a trait alias for the trait `impl Fn(&str) -> Result<(char, &str), ParserError>` generic over `T` instead of `char`. 
+
+From now on, I am using the Rust nightly compiler with the feature `trait_alias`
+
+The resulting block of code with the new type is:
+
+```rust
+#![feature(trait_alias)]
+
+#[derive(Debug)]
+enum ParserError { /* fields */ }
+
+// We add the Parser trait alias
+trait Parser<V> = for<'a> Fn(&'a str) -> Result<(V, &'a str), ParserError>;
+
+// Now pchar returns a type that implements the trait Parser<char>
+fn pchar(match_char: char) -> impl Parser<char> {
+    move |input| { /* code */ }
+}
+
+fn main() {
+    let parseA = pchar('A'); // Create a parse function
+	let result = parseA("ABAABABA") // Use the function
+    println!("{result:?}");
+}
+```
+
+For the record, the same code in stable Rust may be:
+
+```rust
+trait Parser<'a, V>: Fn(&'a str) -> Result<(V, &'a str), ParserError> {}
+impl<'a, V, T: Fn(&'a str) -> Result<(V, &'a str), ParserError>> Parser<'a, V> for T {}
+
+fn pchar<'a>(match_char: char) -> impl Parser<'a, char> {
+    move |input: &'a str| {
+        /* code */
+    }
+}
+```
+
+The downside of stable Rust as of `1.66.1` is that the compiler cannot handle the input `&str` lifetime, and thus we have to specify that it is a lifetime `'a` that outlives the function, hence making it valid. Note how the `Parser<'a, char> ` trait needs the lifetime specified. Using `for <'a>` does not work either.
+
+## Combining parsers
+
+### and\_then
+
+Execute one parser, if it succeeds execute a second one. If any fails, return the error.
+
+```rust
+fn and_then<V>(parser1: impl Parser<V>, parser2: impl Parser<V>) -> impl Parser<Vec<V>> {
+    move |input| {
+        let (res1, remain1) = parser1(input)?;
+        let (res2, remain2) = parser2(remain1)?;
+        Ok((vec![res1, res2], remain2))
+    }
+}
+```
+
+### or\_else
+
+Try to execute one parser, if it fails, execute a second parser. If both fail return an error.
+
+```rust
+fn or_else<V>(parser1: impl Parser<V>, parser2: impl Parser<V>) -> impl Parser<Vec<V>> {
+    move |input| {
+        if let Ok((res, remain)) = parser1(input) {
+            Ok((vec![res], remain))
+        } else {
+            let (res, remain) = parser2(input)?;
+            Ok((vec![res], remain))
+        }
+    }
+}
+```
+
+### map
+
+Apply a function transformation to the result of a parsing function.
+
+```rust
+fn map<V, K>(parser: impl Parser<V>, f: impl Fn((V, &str)) -> (K, &str)) -> impl Parser<K> {
+    move |input| Ok(f(parser(input)?))
+}
+```
