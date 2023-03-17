@@ -473,6 +473,16 @@ fn Blog(cx: Scope) -> impl IntoView {
                     <H1>"Blog"</H1>
                 </div>
                 <div class="flex flex-col space-y-10 md:space-y-0">
+                    <BlogEntryNutshell href="./parser-comb-notes/" title="[WIP] Parser combinator notes"
+                        tags=&[("Rust", "rust"), ("Parser", "parser"), ("WIP", "wip")]
+                        date="2023-03-16"
+                        des="These are my notes from the lecture by Scott Wlaschin, available
+                            at https://www.youtube.com/watch?v=RDalzi7mhdY.
+                            Parsing is a crucial task in computer science, as it allows
+                            us to process and interpret data that goes into our programs.
+                            There are many approaches to parsing, and parser combinators are 
+                            one powerful and flexible tool for building parsers."
+                    />
                     <BlogEntryNutshell href="./type-guidance/" title="Type guidance on APIs using PhantomData"
                         tags=&[("Rust", "rust")]
                         date="2022-08-06"

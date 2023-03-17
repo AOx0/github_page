@@ -1,4 +1,4 @@
-# [WIP] Parser combinator notes
+# Parser combinator notes
 
 These are my notes from the lecture by Scott Wlaschin, available at [**YouTube**](https://www.youtube.com/watch?v=RDalzi7mhdY). 
 
