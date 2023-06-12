@@ -473,6 +473,15 @@ fn Blog(cx: Scope) -> impl IntoView {
                     <H1>"Blog"</H1>
                 </div>
                 <div class="flex flex-col space-y-10 md:space-y-0">
+                    <BlogEntryNutshell href="./networking-notes/" title="[WIP] Networking notes"
+                        tags=&[("Rust", "rust"), ("C", "c"), ("WIP", "wip")]
+                        date="2023-06-11"
+                        des="These notes are based on the book Network Programming with Rust by 
+                            Abhishek Chanda, the excellent Guide to Network Programming by Brian 
+                            Hall, and other sources that describe how networking works. 
+                            My objective here is to have me write down the concepts so 
+                            I can get a better understanding of them."
+                    />
                     <BlogEntryNutshell href="./parser-comb-notes/" title="[WIP] Parser combinator notes"
                         tags=&[("Rust", "rust"), ("Parser", "parser"), ("WIP", "wip")]
                         date="2023-03-16"
