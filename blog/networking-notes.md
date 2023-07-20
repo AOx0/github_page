@@ -50,13 +50,11 @@ We use sockets to connect and communicate with something. We specify what that t
 
 IP addresses come in two versions: 4 and 6. IPv4 addresses are made from 32 bits, while IPv6 addresses use 128 bits. With this many bits on IPv6, we unlock more possible addresses, which is critical for a world where the number of people connected to the internet is so large. With 32-bit addresses making 2^32 (~ 4 billion) possibilities and 128-bit up to 2^128 (~ a lot).
 
+## Basic echo server C
 
+Let's begin by creating a very simple never ending loop that accepts for connections, reads its messages and returns the exact same message back.
 
-## First on C
-
-Let's begin by doing a simple multi-threaded TCP server that responds to all messages with the same contents it received. 
-
-The first step is to create the socket. Although this was difficult in the past, now we can use `getaddrinfo` to quickly and correctly get the necessary information for any IPv4/IPv6 sockets. In the following example, we get the information for a socket on the localhost port 9096 and issue the socket instantiation to the OS using the `socket` function.
+The first step is to create the socket. Although this was difficult in the past, now we can use `getaddrinfo` to quickly and correctly get the necessary information for binding to IPv4/IPv6 addresses. In the following example, we get the information for a socket on the localhost `::` port `9096` and issue the socket instantiation to the OS using the `socket` function.
 
 ```c
 #include <netdb.h>
@@ -72,65 +70,78 @@ int main() {
   };
   
   // Make the system complete the information for localhost port 9096
-  // Uses hints to get the correct socket descriptor into the info.
-  (void)getaddrinfo(NULL, "9096", &hints, &info);
+  // Uses hints to get the correct address information so we can bind to it.
+  // We intend to accept both IPv4 and IPv6, hence we bind to IPv6 address [::].
+  int getaddrinfo_status = getaddrinfo("::", port, &hints, &info);
+
+  // We handle any error while getting the address information structure.
+  if (getaddrinfo_status != 0) {
+    fprintf(stderr, "ERROR :: getaddrinfo: %s\n",
+            gai_strerror(getaddrinfo_status));
+    return 1;
+  }
+
   // Issue the socket with the given info
   int s = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-
-  // Print the assigned file descriptor
   if (s == -1) {
-    printf(" ERR :: Error getting socket \n");
-    return s;
-  } else {
-    printf("INFO :: Got socket descriptor %d\n", s);
-    return 0;
+    perror("ERROR :: socket");
+    freeaddrinfo(info); // Free the addrinfo structure. 
+    return 1;
   }
+
+  printf("INFO :: Got socket descriptor %d\n", s);
 }
 ```
 
-We have a configured TCP socket that can bind to an address. The following step is to perform this with the socket with the target address of localhost on port 9096 and start listening for messages.
+Not that we have a socket that can listen, the following step is to start listening for messages by binding the socket descriptor with the desired service address;
 
 ```c
-#include <netdb.h>
-#include <stdio.h>
-#include <sys/socket.h>
+/* .. past includes .. */ 
+
+#define MAX_CONNECTIONS 50
 
 int main() {
-  struct addrinfo *info;
-  struct addrinfo hints = {.ai_flags = AI_PASSIVE,
-                           .ai_family = PF_UNSPEC,
-                           .ai_socktype = SOCK_STREAM};
+  /* .. past code .. */
 
-  (void)getaddrinfo(NULL, "9096", &hints, &info);
-  int s = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-
-  // Bind to an address object of certain len
-  int res = bind(s, info->ai_addr, info->ai_addrlen);
-  if (res) {
-    printf(" ERR :: Error while binding to socket with status %d\n", res);
-    return res; // Exit if error
+  int reuse_addr = 1;
+  // Allow multiple bindings to the given address/port combination on bind
+  if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(int)) == -1) {
+    perror("ERROR :: setsockopt");
+    close(s); // Close the server file descriptor
+    freeaddrinfo(info); // Free the addrinfo structure. 
+    return 1;
   }
 
-  // Start listening for connections. Max connection queue is 10
-  res = listen(s, 10);
-  if (res) {
-    printf(" ERR :: Error while trying to listen with status %d\n", res);
-    return res; // Exit if error
+  // Bind socket and address/port combination
+  int bind_status = bind(s, info->ai_addr, info->ai_addrlen);
+  if (bind_status == -1) {
+    perror("ERROR :: bind");
+    close(s); // Close the server file descriptor
+    freeaddrinfo(info); // Free the addrinfo structure. 
+    return 1;
   }
 
-  printf("INFO :: Server now listening\n");
-  return 0;
+  printf("INFO :: Bound socket to port %s\n", port);
+
+  // Start listening for connections.
+  int listen_status = listen(s, MAX_CONNECTIONS);
+  if (listen_status == -1) {
+    perror("ERROR :: listen");
+    close(s); // Close the server file descriptor
+    freeaddrinfo(info); // Free the addrinfo structure. 
+    return 1;
+  }
+
+  puts("INFO :: Server now listening");
 }
 ```
 
-Now that the server is running and listening, it's time to accept connections and handle its messages. For this reason, we will create an infinite loop that issues new threads for handling connections.
+Now that the server is running and listening, it's time to accept connections and handle its messages. For this reason, we will create an infinite loop that issues new threads for handling any accepted connections.
 
 ```c
-#include <netdb.h>
+/* .. past includes .. */
 #include <pthread.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
 
 struct conh_args {
   int s;
@@ -147,22 +158,6 @@ void *handle_conn(void *targs) {
 }
 
 int main() {
-  struct addrinfo *info;
-  struct addrinfo hints = {.ai_flags = AI_PASSIVE,
-                           .ai_family = PF_UNSPEC,
-                           .ai_socktype = SOCK_STREAM};
-
-  (void)getaddrinfo(NULL, "9096", &hints, &info);
-  int s = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-
-  (void)bind(s, info->ai_addr, info->ai_addrlen);
-  (void)listen(s, 10);
-
-  struct sockaddr_storage client_addr;
-  socklen_t client_len = sizeof(struct sockaddr_storage);
-
-  int i = 0; // Current thread
-  pthread_t ids[50]; // Thread handlers
 
   while (1) {
     // Accept the new connection. Returns a new file descriptor.

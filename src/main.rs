@@ -9,6 +9,7 @@ use axum::{
 };
 use comrak::plugins::syntect::SyntectAdapter;
 use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
+use leptos::ssr::*;
 use leptos::*;
 use pulldown_cmark::CodeBlockKind;
 use std::io::Write;
@@ -181,7 +182,7 @@ fn Menu(cx: Scope) -> impl IntoView {
             <ItemsCollection/>
             <IconsCollection/>
             <button class="pt-1 hover:text-orange-500"
-                onclick="
+                onclick={"
                     const html = document.getElementsByTagName('html')[0];
                     if(html.classList.contains('dark')) {
                         document.getElementById('t_color').content = 'black'
@@ -192,7 +193,7 @@ fn Menu(cx: Scope) -> impl IntoView {
                         html.classList.add('dark');
                         localStorage.theme = 'dark'
                     }
-                "
+                "}
             >
                 <MoonIcon/>
                 <SunIcon/>
@@ -228,7 +229,7 @@ fn BaseHtml(
     #[prop(optional)] katex: bool,
     #[prop(optional)] alpine: bool,
     #[prop(optional)] blog: bool,
-    children: Box<dyn Fn(Scope) -> Fragment>,
+    children: Children,
 ) -> impl IntoView {
     view! { cx,
         <html class="dark">
@@ -274,9 +275,10 @@ fn BaseHtml(
             <NavBar/>
             <body
                 x-data=x_data
-                class="flex flex-col h-screen bg-white dark:bg-gray-800 text-black dark:text-gray-100"
+                class="flex flex-col h-scree
+                    n bg-white dark:bg-gray-800 text-black dark:text-gray-100"
             >
-                <div class="flex-auto">{children(cx)}</div>
+                <div class="flex-auto">{ children(cx) }</div>
             </body>
             <Footer/>
         </html>
@@ -476,7 +478,7 @@ fn Blog(cx: Scope) -> impl IntoView {
                     <BlogEntryNutshell href="./networking-notes/" title="[WIP] Networking notes"
                         tags=&[("Rust", "rust"), ("C", "c"), ("WIP", "wip")]
                         date="2023-06-11"
-                        des="These notes are based on the book Network Programming with Rust by 
+                        des="These notes are based on the book Network Programming with Rust by
                             Abhishek Chanda, the excellent Guide to Network Programming by Brian 
                             Hall, and other sources that describe how networking works. 
                             My objective here is to have me write down the concepts so 
@@ -524,8 +526,8 @@ fn Welcome(cx: Scope) -> impl IntoView {
             <h1 class="text-4xl md:text-5xl font-bold py-10 ">
                 "About Me"
             </h1>
-            <p class="text-justify">
-                "
+            <p class="text-justify"
+                inner_html = "
                     Hi 👋,<br><br>I'm Alejandro Osornio, an enthusiastic programmer who really enjoys compiled
                     languages, playing around with interpreted ones, and creating side projects of all kinds for
                     fun.<br><br>I am interested in Cyber-security, computer science, math, and Backend, enjoy writing
@@ -533,6 +535,7 @@ fn Welcome(cx: Scope) -> impl IntoView {
                     Data Intelligence and Cyber-security at Panamerican University.<br><br>This web page is my blog,
                     portfolio, and how to contact. Feel free to explore around and to contact me.
                 "
+            >
             </p>
 
         </div>
@@ -675,7 +678,7 @@ fn ContactItem(
 ) -> impl IntoView {
     view! {cx,
         <li>
-            <>{format!("{title}: ")}</>
+            {format!("{title}: ")}
             <Link href=href>
                 {children(cx)}
             </Link>
@@ -876,8 +879,9 @@ fn MarkdownRenderer3(cx: Scope, file: PathBuf, title: String) -> impl IntoView {
 
     view! { cx,
         <BaseHtml title=format!("{}{} - AOx0", &title.to_uppercase().chars().into_iter().next().unwrap(), &title[1..].to_owned().replace("-", " ") ) katex=true blog=true>
-            <div class="max-w-screen-md relative container text-justify md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100">
-                {s.to_owned()}
+            <div class="max-w-screen-md relative container text-justify md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100"
+                inner_html = s.to_owned()
+            >
             </div>
         </BaseHtml>
     }
