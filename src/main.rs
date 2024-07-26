@@ -263,7 +263,7 @@ impl<'src> BaseHtml<'src> {
                     }
                 }
                 (nav_bar())
-                body x-data=(self.x_data) class="flex flex-col h-screen bg-white dark:bg-gray-800 text-black dark:text-gray-100" {
+                body x-data=(self.x_data) class="flex flex-col h-screen bg-white dark:bg-gray-900 text-black dark:text-gray-100" {
                     div .flex-auto { (self.children) }
                 }
                 (footer())
@@ -323,7 +323,7 @@ pub fn tag(name: &'static str, tag: &'static str) -> Markup {
         div class="relative pr-0.5" {
             button 
                 id=(tag) type="button"
-                class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-900/30 dark:text-gray-400 dark:shadow-highlight/4"
+                class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-950/30 dark:text-gray-400 dark:shadow-highlight/4"
                 x-effect=(format!("
                     if (hasValue(search, '{name}')) {{ 
                         $el.classList.remove('bg-gray-400/10'); 
@@ -371,7 +371,7 @@ impl BlogEntryNutshell {
                 }
                 a href=(self.href) {
                     div class="flex justify-between items-center flex-row-revert" {
-                        h2 class="blog-title font-bold text-lg pb-4 hover:text-orange-500 text-left" {(self.title)}
+                        h2 class="blog-title font-bold text-lg pb-2 hover:text-orange-500 text-left" {(self.title)}
                     }
                 }
                 a href=(self.href) { p class="text-justify" {(PreEscaped(self.des))} }
@@ -437,44 +437,26 @@ fn blog() -> Markup {
                     }
                 }
                 div class="flex flex-col space-y-10 md:space-y-0" { (h1("", html!{ "Blog" })) }
-                div class="flex flex-col space-y-10 md:space-y-0" {
+                div class="flex flex-col gap-5" {
                     (BlogEntryNutshell { href: "./networking-notes/", title: "[WIP] Networking notes",
                         tags: &[("Rust", "rust"), ("C", "c"), ("WIP", "wip")],
                         date: "2023-06-11",
-                        des: "These notes are based on the book Network Programming with Rust by
-                            Abhishek Chanda, the excellent Guide to Network Programming by Brian 
-                            Hall, and other sources that describe how networking works. 
-                            My objective here is to have me write down the concepts so 
-                            I can get a better understanding of them."
+                        des: "Random notes from the book Network Programming with Rust by Abhishek Chanda, the Guide to Network Programming by Brian Hall, and other sources."
                     }.render())
                     (BlogEntryNutshell { href: "./parser-comb-notes/", title: "[WIP] Parser combinator notes",
                         tags: &[("Rust", "rust"), ("Parser", "parser"), ("WIP", "wip")],
                         date: "2023-03-16",
-                        des: "These are my notes from the lecture by Scott Wlaschin, available
-                            at https://www.youtube.com/watch?v=RDalzi7mhdY.
-                            Parsing is a crucial task in computer science, as it allows
-                            us to process and interpret data that goes into our programs.
-                            There are many approaches to parsing, and parser combinators are 
-                            one powerful and flexible tool for building parsers."
+                        des: "Parser combinators are simple, powerful and flexible for building parsers. I explore how to do it with Rust"
                     }.render())
                     (BlogEntryNutshell { href: "./type-guidance/", title:"Type guidance on APIs using PhantomData",
                         tags: &[("Rust", "rust")],
                         date: "2022-08-06",
-                        des: "When writing APIs it's easy for users to make
-                        misuses of methods defined within a struct. There are 
-                        cases when you might want to restrict the methods available 
-                        downstream depending on the state of an instance. In this writeup I 
-                        talk about Rust's PhantomData and how to use it to design unbreakable APIs."
+                        des: "In this writeup I learn about PhantomData and how to use it to design unbreakable APIs."
                     }.render())
                     (BlogEntryNutshell { href: "./covid/", title: "Data analysis exercise: COVID19 in México",
                         tags: &[("Mathematica", "mathematica")],
                         date: "2021-12-25",
-                        des: "COVID-19 reached every place on the earth.
-                        An examination of open data from México will reveal the situation there. 
-                        This paper aims to describe it by showing plenty of plots and graphs, 
-                        explaining how to develop them in the process.<br/><br/>The purpose, 
-                        to strengthen my general analysis skills, practicing methods used to produce 
-                        high-quality media."
+                        des: "A naive examination of open data from México about COVID-19. The purpose, to strengthen my general analysis skills, practicing methods used to produce high-quality media."
                     }.render())
                 }
             }
