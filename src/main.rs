@@ -4,27 +4,20 @@ use anyhow::Result;
 use axum::debug_handler;
 use axum::extract::Path;
 use axum::routing::get_service;
-use axum::{
-    response::Redirect,
-    routing::get,
-    Router,
-};
+use axum::{response::Redirect, routing::get, Router};
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 use pulldown_cmark::{CodeBlockKind, TagEnd};
-use tokio::net::TcpListener;
 use std::io::Write;
 use std::process::Command;
 use std::process::Stdio;
 use std::str::FromStr;
 use std::{fs::OpenOptions, path::PathBuf};
 use tokio::fs::remove_dir_all;
+use tokio::net::TcpListener;
 
 #[debug_handler]
 async fn handle_error(/* err: std::io::Error */) -> (http::StatusCode, String) {
-    (
-        http::StatusCode::NOT_FOUND,
-        "File not found: ".to_string(),
-    )
+    (http::StatusCode::NOT_FOUND, "File not found: ".to_string())
 }
 
 fn footer() -> Markup {
@@ -50,8 +43,8 @@ fn footer() -> Markup {
 fn moon_icon() -> Markup {
     html! {
         (PreEscaped(r#"
-            <svg class="hidden dark:block" height="1em" viewBox="0 0 50 50" width="1em" xmlns="http://www.w3.org/2000/svg">
-                <path d="M 43.81 29.354 C 43.688 28.958 43.413 28.626 43.046 28.432 C 42.679 28.238 42.251 28.198 41.854 28.321 C 36.161 29.886 30.067 28.272 25.894 24.096 C 21.722 19.92 20.113 13.824 21.683 8.133 C 21.848 7.582 21.697 6.985 21.29 6.578 C 20.884 6.172 20.287 6.022 19.736 6.187 C 10.9 8.728 4.691 17.389 5.55 26.776 C 6.408 36.163 13.847 43.598 23.235 44.451 C 32.622 45.304 41.28 39.332 43.816 30.253 C 43.902 29.96 43.9 29.647 43.81 29.354 Z" fill="currentColor"/>
+            <svg class="hidden dark:block size-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
             </svg>
         "#))
     }
@@ -60,17 +53,8 @@ fn moon_icon() -> Markup {
 fn sun_icon() -> Markup {
     html! {
         (PreEscaped(r#"
-            <svg class="block dark:hidden" width="1em" viewBox="0 0 24 24" height="1em" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle r="5.75375" fill="currentColor" "11.9998" cy="11.9998"/>
-                <g>
-                    <circle transform="rotate(-60 3.08982 6.85502)" fill="currentColor" "3.08982" cy="6.85502" r="1.71143"/>
-                    <circle r="1.71143" "3.0903" cy="17.1436" transform="rotate(-120 3.0903 17.1436)" fill="currentColor"/>
-                    <circle r="1.71143" "12" cy="22.2881" fill="currentColor"/>
-                    <circle transform="rotate(-60 20.9101 17.1436)" cy="17.1436" "20.9101" r="1.71143" fill="currentColor"/>
-                    <circle cy="6.8555" r="1.71143" fill="currentColor" "20.9101" transform="rotate(-120 20.9101 6.8555)"/>
-                    <circle fill="currentColor" cy="1.71143" r="1.71143" "12"/>
-                </g>
-
+            <svg class="block dark:hidden size-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
             </svg>
         "#))
     }
@@ -168,7 +152,7 @@ fn menu() -> Markup {
     html! {
         (items_collection())
         (icons_collection())
-        button class="pt-1 hover:text-orange-500"
+        button class="hover:text-orange-500"
             onclick="
                 const html = document.getElementsByTagName('html')[0];
                 if(html.classList.contains('dark')) {
@@ -190,9 +174,9 @@ fn menu() -> Markup {
 
 fn nav_bar(children: Markup) -> Markup {
     html! {
-        nav class="relative container v-screen mx-auto pt-6 md:py-6 px-10  text-black dark:text-gray-100" {
+        nav class="relative container v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100" {
             div class="flex items-center justify-between" {
-                div class="pt-2" { (aox0()) }
+                div { (aox0()) }
                 (children)
                 div class="hidden md:flex space-x-6" { (menu()) }
             }
@@ -212,7 +196,7 @@ struct BaseHtml<'src> {
     alpine: bool,
     blog: bool,
     children: Markup,
-    nav_bar_middle: Markup
+    nav_bar_middle: Markup,
 }
 
 impl<'src> BaseHtml<'src> {
@@ -220,20 +204,21 @@ impl<'src> BaseHtml<'src> {
         html! {
             (DOCTYPE)
             html .dark {
+
                 head {
                     meta id="t_color" name="theme-color" content="rgb(31 41 55 / var(--tw-bg-opacity))" {}
                     meta name="viewport" content="width=device-width, initial-scale=1.0" {}
                     meta charset="UTF-8" {}
                     title {(self.title)}
                     link rel="stylesheet" href="/static/styles.css" {}
+                    link href="/static/fonts/inconsolata-semibold.woff2" rel="woff2-font";
+                    link href="/static/fonts/inconsolata.woff2" rel="woff2-font";
 
                     @if self.alpine || !self.x_data.is_empty() {
                         script src=r"https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer init {}
                     }
 
-                    @if self.blog {
-                        link rel="stylesheet" href="/static/blog_styles.css" {}
-                    }
+                    link rel="stylesheet" href="/static/blog_styles.css" {}
                     script {(PreEscaped(r#"
                         const html = document.getElementsByTagName('html')[0];
                         if (localStorage.theme === 'dark' || !('theme' in localStorage)) {
@@ -282,24 +267,6 @@ pub fn link(more: &'static str, href: &'static str, children: Markup) -> Markup 
     }
 }
 
-fn h1(more: &'static str, children: Markup) -> Markup {
-    html! {
-        h1 class=(format!("text-4xl md:text-5xl font-bold py-10 {more}")) { (children) }
-    }
-}
-
-fn h2(more: &'static str, children: Markup) -> Markup {
-    html! {
-        h2 class=(format!("text-3xl md:text-4xl font-semibold py-5 {more}")) { (children) }
-    }
-}
-
-fn h3(more: &'static str, children: Markup) -> Markup {
-    html! {
-        h3 class=(format!("text-1xl md:text-2xl font-semibold py-4 {more}")) { (children) }
-    }
-}
-
 fn caption(msg: &'static str) -> Markup {
     html! {
         p class="text-sm font-light block text-center pt-1" { (msg) }
@@ -323,20 +290,20 @@ fn p(children: Markup) -> Markup {
 pub fn tag(name: &'static str, tag: &'static str) -> Markup {
     html! {
         div class="relative pr-0.5" {
-            button 
+            button
                 id=(tag) type="button"
                 class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-950/30 dark:text-gray-400 dark:shadow-highlight/4"
                 x-effect=(format!("
-                    if (hasValue($store.search.text, '{name}')) {{ 
-                        $el.classList.remove('bg-gray-400/10'); 
-                        $el.classList.remove('dark:bg-gray-950/30'); 
-                        $el.classList.add('bg-gray-800/10'); 
-                        $el.classList.add('dark:bg-gray-600/30'); 
+                    if (hasValue($store.search.text, '{name}')) {{
+                        $el.classList.remove('bg-gray-400/10');
+                        $el.classList.remove('dark:bg-gray-950/30');
+                        $el.classList.add('bg-gray-800/10');
+                        $el.classList.add('dark:bg-gray-600/30');
                     }} else {{
-                        $el.classList.add('bg-gray-400/10'); 
-                        $el.classList.add('dark:bg-gray-950/30'); 
-                        $el.classList.remove('bg-gray-800/10'); 
-                        $el.classList.remove('dark:bg-gray-600/30'); 
+                        $el.classList.add('bg-gray-400/10');
+                        $el.classList.add('dark:bg-gray-950/30');
+                        $el.classList.remove('bg-gray-800/10');
+                        $el.classList.remove('dark:bg-gray-600/30');
                     }}
                 "))
                 x-on:click=(format!(
@@ -367,8 +334,8 @@ impl BlogEntryNutshell {
             div class="flex flex-col" x-show="show_item($el)" {
                 div class="flex" {
                     (tag(self.date, self.date))
-                    @for (name, ntag) in self.tags.iter() { 
-                        (tag(name, ntag)) 
+                    @for (name, ntag) in self.tags.iter() {
+                        (tag(name, ntag))
                     }
                 }
                 a href=(self.href) {
@@ -394,7 +361,7 @@ fn search_bar() -> Markup {
               }
               return false;
             }
-        
+
             function removeWord(string, word) {
               const parts = string.split(/(, | )/);
               const filteredParts = parts.filter(part => part !== word && part !== `, ${word}` && part !== ` ${word}`);
@@ -425,7 +392,7 @@ fn search_bar() -> Markup {
             class="wrapper relative max-w-screen-md container text-left v-screen mx-auto px-10 text-black dark:text-gray-100"
         {
             div class="lg:text-sm lg:leading-6 relative" {
-                div class="sticky pointer-events-none" { 
+                div class="sticky pointer-events-none" {
                     div class="relative pointer-events-auto" {
                         div
                             class="p-0 w-full flex items-center text-sm leading-6 text-gray-400 rounded-md ring-1 ring-gray-950/10 shadow-sm py-1.5 pl-2 pr-3 bg-white dark:bg-gray-950/30 md:dark:highlight-white/5 space-x-2 md:dark:hover:bg-gray-950"
@@ -447,7 +414,7 @@ fn search_bar() -> Markup {
 }
 
 fn blog() -> Markup {
-        BaseHtml{ title: "Blog - AOx0", alpine: true, children: html!{ 
+    BaseHtml{ title: "Blog - AOx0", alpine: true, children: html!{
             div
                 class="wrapper relative max-w-screen-md container text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100"
                  x-data=(PreEscaped(r#"{
@@ -456,7 +423,7 @@ fn blog() -> Markup {
                     }
                 }"#))
             {
-                div class="flex flex-col space-y-10 md:space-y-0" { (h1("", html!{ "Blog" })) }
+                div class="flex flex-col space-y-10 md:space-y-0" { h1 {  ("Blog") } }
                 div class="flex flex-col gap-5" {
                     (BlogEntryNutshell { href: "./networking-notes/", title: "[WIP] Networking notes",
                         tags: &[("Rust", "rust"), ("C", "c"), ("WIP", "wip")],
@@ -505,7 +472,7 @@ fn contact() -> Markup {
     BaseHtml { title:"Contact - AOx0", children: html!{
         div class="max-w-screen-md relative container text-left justify-left md:text-left
             v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100" {
-            (h1("", html!("Where to find me")))
+            h1 { ("Where to find me") }
             p { "Feel free to reach me out in any of the following places:" }
             ul class="list-disc list-inside pt-10" {
                 (contact_item("Email", "mailto:aoxo.contact@gmail.com", html!{ "aoxo.contact@gmail.com" }))
@@ -575,6 +542,55 @@ fn markdown(file: PathBuf, title: String) -> Markup {
                     lang = lang.replace("mathematica", "Mathematica");
                 }
             }
+            Event::Code(a) => {
+                if a.starts_with("lang@") {
+                    lang = a.replace("lang@", "");
+                    lang = lang.split_whitespace().next().unwrap().to_string()
+                }
+
+                let text = a.trim_start_matches("lang@").trim_start_matches(&lang);
+
+                let mut child = Command::new("chroma")
+                    .args([
+                        &format!(r#"--lexer={}"#, lang),
+                        r#"--style=github-dark"#,
+                        r#"--html"#,
+                        r#"--html-only"#,
+                    ])
+                    .stdin(Stdio::piped())
+                    .stdout(Stdio::piped())
+                    .spawn()
+                    .unwrap();
+
+                let child_stdin = child.stdin.as_mut().unwrap();
+                child_stdin.write_all(text.as_bytes()).unwrap();
+                let _ = child_stdin;
+
+                let output = child.wait_with_output().unwrap();
+
+                let mut child = Command::new("ruplacer")
+                    .args([r#"class="([a-zA-Z0-9]+)""#, r#"class="dark:$1 $1""#, r"-"])
+                    .stdin(Stdio::piped())
+                    .stdout(Stdio::piped())
+                    .spawn()
+                    .unwrap();
+
+                let child_stdin = child.stdin.as_mut().unwrap();
+                child_stdin.write_all(&output.stdout).unwrap();
+                let _ = child_stdin;
+
+                let output = child.wait_with_output().unwrap();
+
+                let html = String::from_utf8(output.stdout).unwrap();
+                let html = html
+                    .trim()
+                    .trim_start_matches("<pre class=\"dark:chroma chroma\">")
+                    .trim_end_matches("</pre>")
+                    .replace("<code>", "<code class=\"dark:chroma chroma\">")
+                    .replace("class=\"dark:line line\"", "");
+                // And put it into the vector
+                new_p.push(Event::InlineHtml(html.into()));
+            }
             Event::End(TagEnd::CodeBlock) => {
                 if in_code_block {
                     // Format the whole multi-line code block as HTML all at once
@@ -635,8 +651,8 @@ fn markdown(file: PathBuf, title: String) -> Markup {
 
     BaseHtml {
         title: &format!("{}{} - AOx0", &title.to_uppercase().chars().next().unwrap(), &title[1..].to_owned().replace("-", " ") ),
-        katex: true, 
-        blog: true, 
+        katex: true,
+        blog: true,
         children: html!(
             div class="max-w-screen-md relative container text-justify md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100" {(PreEscaped(s.to_owned()))}
         ),
@@ -681,8 +697,11 @@ async fn main() -> Result<()> {
         .route("/contact/", get(show_contact))
         .route("/blog/:name/", get(show_blog_entry))
         .route("/blog/", get(show_blog))
-        .nest_service("/static/", get_service(tower_http::services::ServeDir::new("./static")));
-        // .nest_service("/static/", static_service);
+        .nest_service(
+            "/static/",
+            get_service(tower_http::services::ServeDir::new("./static")),
+        );
+    // .nest_service("/static/", static_service);
 
     let port = "8000";
 
@@ -748,8 +767,7 @@ async fn main() -> Result<()> {
 
         let a = tokio::spawn(renderer);
 
-        let server =
-            axum::serve(listener, app.into_make_service());
+        let server = axum::serve(listener, app.into_make_service());
 
         let graceful = server.with_graceful_shutdown(async move {
             println!("Starting Axum Server");
@@ -762,7 +780,9 @@ async fn main() -> Result<()> {
         a.await??;
         Ok(())
     } else {
-        axum::serve(listener, app.into_make_service()).await.unwrap();
+        axum::serve(listener, app.into_make_service())
+            .await
+            .unwrap();
         Ok(())
     }
 }

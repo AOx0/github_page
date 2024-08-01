@@ -1,22 +1,22 @@
 # Parser combinator notes
 
-These are my notes from the lecture by Scott Wlaschin, available at [**YouTube**](https://www.youtube.com/watch?v=RDalzi7mhdY). 
+These are my notes from the lecture by Scott Wlaschin, available at [**YouTube**](https://www.youtube.com/watch?v=RDalzi7mhdY).
 
-Scott uses F# at his slices, though I am not using F# but Rust, so I will rewrite as well as my ability permits to Rust code. 
+Scott uses F# at his slices, though I am not using F# but Rust, so I will rewrite as well as my ability permits to Rust code.
 
 Parsing is a crucial task in computer science, as it allows us to process and interpret data that goes into our programs.
 There are many approaches to parsing, and parser combinators are one powerful and flexible tool for building parsers.
 
-Scott explains what parser combinators are and how they work. 
-He starts by looking at the basics of simple parsers that can match individual characters or patterns in input data. 
-From there, he expands on combinator functions to compose parsers into more complex ones. 
+Scott explains what parser combinators are and how they work.
+He starts by looking at the basics of simple parsers that can match individual characters or patterns in input data.
+From there, he expands on combinator functions to compose parsers into more complex ones.
 This essay will take a very close approach to Scott, building over his slides and my implementation with explanations about the code.
 
 ## Parsing a single character
 
-Let us start by creating a simple parser that matches the character `'A'`. 
+Let us start by creating a simple parser that matches the character `lang@rust 'A'`.
 
-First, we will need an enumerator for returning errors. The code is self-explanatory. 
+First, we will need an enumerator for returning errors. The code is self-explanatory.
 Two edge cases cause failure; either we have an empty input string, or the character we are matching against (`'A'`) is not present in the place we expect it to be within the input chars.
 
 ```rust
@@ -30,12 +30,12 @@ Then we have a parser function, `pcharA`, which verifies if the first character 
 
 ```rust
 fn pcharA(input: &str) -> Result<&str, ParserError> {
-	
+
 	// We return an error if the string is empty.
 	// It may be empty because the parser has finished
     if input.is_empty() {
         Err(ParserError::EmptyInput)
-    } 
+    }
 
 	// If it is not empty, we match the first character of the string with 'A'
 	else if input.chars().nth(0).expect("Found empty string") == 'A' {
@@ -43,7 +43,7 @@ fn pcharA(input: &str) -> Result<&str, ParserError> {
 		// We do this because we can continue to parse from where this function
 		// lefts it.
         Ok(&input[1..])
-    } 
+    }
 
 	else {
 		// If it's not a match, we return an error status.
@@ -56,7 +56,7 @@ As for now, we can visually see this function as a microchip with one input pin 
 
 ![Parsing a constant char 'A'](/static/blog/wlaschin-parser-combinators/pcharA.png)
 
-The next update is to make this code accept any character `match_char` to parse. 
+The next update is to make this code accept any character `match_char` to parse.
 
 The update demands we update the error enumerator to include more information, what the character expects, and what it found.
 
@@ -74,7 +74,7 @@ The function is no longer named `pcharA` per the function's ability to parse any
 fn pchar(input: &str, match_char: char) -> Result<(char, &str), ParserError> {
     if input.is_empty() {
         Err(ParserError::EmptyInput)
-    } 
+    }
 	// The only difference is that it matches the input character
 	else if input.chars().nth(0).expect("Unexpected empty str") == match_char {
         Ok((match_char, &input[1..]))
@@ -107,7 +107,7 @@ fn main() {
 }
 ```
 
-We can take advantage of the Ok status return type since it contains a reference to the remaining input to parse to create parsing loops that end when the remaining is empty. 
+We can take advantage of the Ok status return type since it contains a reference to the remaining input to parse to create parsing loops that end when the remaining is empty.
 
 ```rust
 fn main() {
@@ -138,14 +138,14 @@ fn main() {
 }
 ```
 
-The code above is an elementary example of a toy parser that looks for characters `{'A', 'B'}`.  
+The code above is an elementary example of a toy parser that looks for characters `{'A', 'B'}`.
 When an unexpected char is encountered, the matching char changes to the other alternative, if the character is not `'A'` nor `'B'` then a panic occurs. The point here is we can loop over the remaining string to parse until we find an `Err(ParserError::EmptyInput)`, in which case we know the remaining string to parse is empty, and thus we have finished parsing.
 
 ## Taking it to purely functional
 
-Up to now, there is nothing strange about these two past functions, they are what we all expect them to be. Though, the next step turns up the thing to be more interesting. 
+Up to now, there is nothing strange about these two past functions, they are what we all expect them to be. Though, the next step turns up the thing to be more interesting.
 
-Instead of having a function that takes a character to match while parsing, we are making a function that can craft functions. This is, instead of building a function to parse x char, we are programming a function that can build another function that parses a constant, bounded character. 
+Instead of having a function that takes a character to match while parsing, we are making a function that can craft functions. This is, instead of building a function to parse x char, we are programming a function that can build another function that parses a constant, bounded character.
 
 To fully understand this, let us take a closer look at the concept of function-builder functions. A function-builder function is a function that creates and returns another function. It takes one or more arguments, and the function that gets returned is *bound* to those arguments.
 
@@ -209,7 +209,7 @@ fn pchar(match_char: char) -> impl Fn(&str) -> Result<(char, &str), ParserError>
 }
 ```
 
-Specific to Rust, look at the return type described in the signature. 
+Specific to Rust, look at the return type described in the signature.
 
 ```rust
 fn pchar(..) -> impl Fn(&str) -> Result<(char, &str), ParserError>
@@ -217,7 +217,7 @@ fn pchar(..) -> impl Fn(&str) -> Result<(char, &str), ParserError>
 
 The `impl` part means we are dealing with the Rust trait system. `pchar` returns a value that complies with being a function with an immutable state with a string slice (`&str`) as input and a `Result` with specific types for error and ok statuses as its output.
 
-Within the function, we return a closure. This closure, as the signature implies, takes an `input` and returns `Result<(char, &str), ParserError>` from its code block:
+Within the function, we return a closure. This closure, as the signature implies, takes an `input` and returns `lang@rust Result<(char, &str), ParserError>` from its code block:
 
 ```rust
 move |input| { .. }
@@ -241,7 +241,7 @@ fn main() {
 }
 ```
 
-To end this first functional stage, we will create a trait "alias" for the trait `impl Fn(&str) -> Result<(char, &str), ParserError>` generic over `T` instead of `char`. 
+To end this first functional stage, we will create a trait "alias" for the trait `impl Fn(&str) -> Result<(char, &str), ParserError>` generic over `T` instead of `char`.
 
 The resulting block of code with the new type is:
 
@@ -266,7 +266,7 @@ fn main() {
 ```
 
 In the code listed above first we create a trait `Parser` that requires that types
-that want to implement it also implement the `Fn(&str) -> Result<(V, &str), ParserError>` trait. 
+that want to implement it also implement the `Fn(&str) -> Result<(V, &str), ParserError>` trait.
 
 Then, we create a blanket implementationi of `Parser<V>` for every type `T` that implements `Fn(&str) -> Result<(V, &str), ParserError>`.
 
