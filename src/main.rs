@@ -32,13 +32,13 @@ fn footer() -> Markup {
         footer id="footer" class="text-black dark:text-gray-100" {
             div class="container flex flex-col-reverse justify-between px-6 py-10 mx-auto space-y-8 md:space-y-0" {
                 div class="text-xs block text-center" {
-                    "Copyright © 2024 Alejandro Osornio (AOx0). All rights reserved."
-                    br {}
+                    // "Copyright © 2024 Alejandro Osornio (AOx0). All rights reserved."
+                    // br {}
                     "Made by AOx0 with "
                     a target="_blank" rel="noopener noreferrer" href="https://github.com/gbj/leptos" class="underline" { "Maud" }
                     ", "
                     a target="_blank" rel="noopener noreferrer" href="https://github.com/alpinejs/alpine" class="underline" { "AlpineJS" }
-                    " &amp; "
+                    (PreEscaped(" &amp; "))
                     a target="_blank" rel="noopener noreferrer" href="https://github.com/tailwindlabs/tailwindcss" class="underline" { "TailwindCSS" }
                     ". "
                 }
@@ -51,7 +51,7 @@ fn moon_icon() -> Markup {
     html! {
         (PreEscaped(r#"
             <svg class="hidden dark:block" height="1em" viewBox="0 0 50 50" width="1em" xmlns="http://www.w3.org/2000/svg">
-                <svg::path d="M 43.81 29.354 C 43.688 28.958 43.413 28.626 43.046 28.432 C 42.679 28.238 42.251 28.198 41.854 28.321 C 36.161 29.886 30.067 28.272 25.894 24.096 C 21.722 19.92 20.113 13.824 21.683 8.133 C 21.848 7.582 21.697 6.985 21.29 6.578 C 20.884 6.172 20.287 6.022 19.736 6.187 C 10.9 8.728 4.691 17.389 5.55 26.776 C 6.408 36.163 13.847 43.598 23.235 44.451 C 32.622 45.304 41.28 39.332 43.816 30.253 C 43.902 29.96 43.9 29.647 43.81 29.354 Z" fill="currentColor"/>
+                <path d="M 43.81 29.354 C 43.688 28.958 43.413 28.626 43.046 28.432 C 42.679 28.238 42.251 28.198 41.854 28.321 C 36.161 29.886 30.067 28.272 25.894 24.096 C 21.722 19.92 20.113 13.824 21.683 8.133 C 21.848 7.582 21.697 6.985 21.29 6.578 C 20.884 6.172 20.287 6.022 19.736 6.187 C 10.9 8.728 4.691 17.389 5.55 26.776 C 6.408 36.163 13.847 43.598 23.235 44.451 C 32.622 45.304 41.28 39.332 43.816 30.253 C 43.902 29.96 43.9 29.647 43.81 29.354 Z" fill="currentColor"/>
             </svg>
         "#))
     }
@@ -61,15 +61,15 @@ fn sun_icon() -> Markup {
     html! {
         (PreEscaped(r#"
             <svg class="block dark:hidden" width="1em" viewBox="0 0 24 24" height="1em" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <svg::circle r="5.75375" fill="currentColor" "11.9998" cy="11.9998"/>
-                <svg::g>
-                    <svg::circle transform="rotate(-60 3.08982 6.85502)" fill="currentColor" "3.08982" cy="6.85502" r="1.71143"/>
-                    <svg::circle r="1.71143" "3.0903" cy="17.1436" transform="rotate(-120 3.0903 17.1436)" fill="currentColor"/>
-                    <svg::circle r="1.71143" "12" cy="22.2881" fill="currentColor"/>
-                    <svg::circle transform="rotate(-60 20.9101 17.1436)" cy="17.1436" "20.9101" r="1.71143" fill="currentColor"/>
-                    <svg::circle cy="6.8555" r="1.71143" fill="currentColor" "20.9101" transform="rotate(-120 20.9101 6.8555)"/>
-                    <svg::circle fill="currentColor" cy="1.71143" r="1.71143" "12"/>
-                </svg::g>
+                <circle r="5.75375" fill="currentColor" "11.9998" cy="11.9998"/>
+                <g>
+                    <circle transform="rotate(-60 3.08982 6.85502)" fill="currentColor" "3.08982" cy="6.85502" r="1.71143"/>
+                    <circle r="1.71143" "3.0903" cy="17.1436" transform="rotate(-120 3.0903 17.1436)" fill="currentColor"/>
+                    <circle r="1.71143" "12" cy="22.2881" fill="currentColor"/>
+                    <circle transform="rotate(-60 20.9101 17.1436)" cy="17.1436" "20.9101" r="1.71143" fill="currentColor"/>
+                    <circle cy="6.8555" r="1.71143" fill="currentColor" "20.9101" transform="rotate(-120 20.9101 6.8555)"/>
+                    <circle fill="currentColor" cy="1.71143" r="1.71143" "12"/>
+                </g>
 
             </svg>
         "#))
@@ -86,7 +86,7 @@ struct MenuItem {
 }
 
 impl MenuItem {
-    pub fn render(&self) -> Markup {
+    pub fn render(self) -> Markup {
         let color = if self.color.is_empty() {
             "text-orange-500"
         } else {
@@ -116,7 +116,7 @@ fn linked_in() -> Markup {
     html! {
         (PreEscaped(r#"
             <svg view_box="0 0 24 24" fill="currentColor" width="24" height="24">
-                <svg::path
+                <path
                     d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
                 />
             </svg>
@@ -128,7 +128,7 @@ fn github() -> Markup {
     html! {
         (PreEscaped(r#"
             <svg fill="currentColor" viewBox="0 0 16 16" width="24" height="24">
-                <svg::path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" fill-rule="evenodd"/>
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" fill-rule="evenodd"/>
             </svg>
         "#))
     }
@@ -188,11 +188,12 @@ fn menu() -> Markup {
     }
 }
 
-fn nav_bar() -> Markup {
+fn nav_bar(children: Markup) -> Markup {
     html! {
         nav class="relative container v-screen mx-auto pt-6 md:py-6 px-10  text-black dark:text-gray-100" {
             div class="flex items-center justify-between" {
                 div class="pt-2" { (aox0()) }
+                (children)
                 div class="hidden md:flex space-x-6" { (menu()) }
             }
             div class="flex flex-wrap md:hidden justify-center space-x-5 md:space-x-6 space-y-2 container v-screen mx-auto py-6 px-10 text-black dark:text-gray-100" {
@@ -211,10 +212,11 @@ struct BaseHtml<'src> {
     alpine: bool,
     blog: bool,
     children: Markup,
+    nav_bar_middle: Markup
 }
 
 impl<'src> BaseHtml<'src> {
-    fn render(&'src self) -> Markup {
+    fn render(self) -> Markup {
         html! {
             (DOCTYPE)
             html .dark {
@@ -262,7 +264,7 @@ impl<'src> BaseHtml<'src> {
                         "#))}
                     }
                 }
-                (nav_bar())
+                (nav_bar(self.nav_bar_middle))
                 body x-data=(self.x_data) class="flex flex-col h-screen bg-white dark:bg-gray-900 text-black dark:text-gray-100" {
                     div .flex-auto { (self.children) }
                 }
@@ -325,23 +327,23 @@ pub fn tag(name: &'static str, tag: &'static str) -> Markup {
                 id=(tag) type="button"
                 class="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center dark:bg-gray-950/30 dark:text-gray-400 dark:shadow-highlight/4"
                 x-effect=(format!("
-                    if (hasValue(search, '{name}')) {{ 
+                    if (hasValue($store.search.text, '{name}')) {{ 
                         $el.classList.remove('bg-gray-400/10'); 
-                        $el.classList.remove('dark:bg-gray-900/30'); 
+                        $el.classList.remove('dark:bg-gray-950/30'); 
                         $el.classList.add('bg-gray-800/10'); 
                         $el.classList.add('dark:bg-gray-600/30'); 
                     }} else {{
                         $el.classList.add('bg-gray-400/10'); 
-                        $el.classList.add('dark:bg-gray-900/30'); 
+                        $el.classList.add('dark:bg-gray-950/30'); 
                         $el.classList.remove('bg-gray-800/10'); 
                         $el.classList.remove('dark:bg-gray-600/30'); 
                     }}
                 "))
                 x-on:click=(format!(
-                    "if (!hasValue(search, '{name}')) {{
-                        search=addWord(search, '{name}')
+                    "if (!hasValue($store.search.text, '{name}')) {{
+                        $store.search.update(addWord($store.search.text, '{name}'))
                     }} else {{
-                        search=removeWord(search, '{name}')
+                        $store.search.update(removeWord($store.search.text, '{name}'))
                     }}"
                 ))
             {
@@ -360,7 +362,7 @@ struct BlogEntryNutshell {
 }
 
 impl BlogEntryNutshell {
-    pub fn render(&self) -> Markup {
+    pub fn render(self) -> Markup {
         html! {
             div class="flex flex-col" x-show="show_item($el)" {
                 div class="flex" {
@@ -380,62 +382,80 @@ impl BlogEntryNutshell {
     }
 }
 
-fn blog() -> Markup {
-        BaseHtml{ title: "Blog - AOx0", alpine: true, children: html!{ 
-            script {(PreEscaped(r#"
-                function hasValue(searchIn, searchFor) {
-                  const searchForWords = searchFor.split(/[ ,]+/);
-                  for (const word of searchForWords) {
-                    if (searchIn.includes(word)) {
-                      return true;
-                    }
-                  }
-                  return false;
+fn search_bar() -> Markup {
+    html! {
+        script {(PreEscaped(r#"
+            function hasValue(searchIn, searchFor) {
+              const searchForWords = searchFor.split(/[ ,]+/);
+              for (const word of searchForWords) {
+                if (searchIn.includes(word)) {
+                  return true;
                 }
-                
-                function removeWord(string, word) {
-                  const parts = string.split(/(, | )/);
-                  const filteredParts = parts.filter(part => part !== word && part !== `, ${word}` && part !== ` ${word}`);
-                  const newString = filteredParts.join("");
+              }
+              return false;
+            }
+        
+            function removeWord(string, word) {
+              const parts = string.split(/(, | )/);
+              const filteredParts = parts.filter(part => part !== word && part !== `, ${word}` && part !== ` ${word}`);
+              const newString = filteredParts.join("");
 
-                  return newString.replace(/[, ]+/g, " ").trim().replace(/^[, ]+|[, ]+$/g, "");
+              return newString.replace(/[, ]+/g, " ").trim().replace(/^[, ]+|[, ]+$/g, "");
+            }
+
+            function addWord(string, word) {
+                const words = string.split(/[, ]+/);
+                if (!words.includes(word)) {
+                    words.push(word);
                 }
-    
-                function addWord(string, word) {
-                    const words = string.split(/[, ]+/);
-                    if (!words.includes(word)) {
-                        words.push(word);
+                return words.join(" ").replace(/^[, ]+|[, ]+$/g, "");
+            }
+
+            document.addEventListener('alpine:init', () => {
+                Alpine.store('search', {
+                    text: '',
+
+                    update(text) {
+                        this.text = text
                     }
-                    return words.join(" ").replace(/^[, ]+|[, ]+$/g, "");
-                }
-            "#))}
-            div
-                class="wrapper relative max-w-screen-md container text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100"
-                 x-data=(PreEscaped(r#"{
-                    search: '',
-                    show_item(el){
-                        return this.search === '' || hasValue(el.textContent.toLowerCase(), this.search.toLowerCase());
-                    }
-                }"#))
-            {
-                div class="lg:text-sm lg:leading-6 relative" {
-                    div class="sticky pointer-events-none" { 
-                        div class="relative pointer-events-auto" {
-                            div
-                                class="p-0 w-full flex items-center text-sm leading-6 text-gray-400 rounded-md ring-1 ring-gray-900/10 shadow-sm py-1.5 pl-2 pr-3 bg-white dark:bg-gray-900/30 md:dark:highlight-white/5 space-x-2 md:dark:hover:bg-gray-900"
-                            {
-                                (PreEscaped(r#"
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-                                      <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
-                                    </svg>
-                                "#))
-                                (PreEscaped(r#"
-                                    <input style="-webkit-appearance: none; -webkit-border-radius:0px;" x-model="search" type="search" class="search-input h-full grow !border-none !focus:ring-0 !outline-none relative !bg-transparent rounded-none" placeholder="Quick search..."/>
-                                "#))
-                            }
+                })
+            })
+        "#))}
+        div
+            class="wrapper relative max-w-screen-md container text-left v-screen mx-auto px-10 text-black dark:text-gray-100"
+        {
+            div class="lg:text-sm lg:leading-6 relative" {
+                div class="sticky pointer-events-none" { 
+                    div class="relative pointer-events-auto" {
+                        div
+                            class="p-0 w-full flex items-center text-sm leading-6 text-gray-400 rounded-md ring-1 ring-gray-950/10 shadow-sm py-1.5 pl-2 pr-3 bg-white dark:bg-gray-950/30 md:dark:highlight-white/5 space-x-2 md:dark:hover:bg-gray-950"
+                        {
+                            (PreEscaped(r#"
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                  <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
+                                </svg>
+                            "#))
+                            (PreEscaped(r#"
+                                <input style="-webkit-appearance: none; -webkit-border-radius:0px;" x-model="$store.search.text" type="search" class="search-input h-full grow !border-none !focus:ring-0 !outline-none relative !bg-transparent rounded-none" placeholder="Quick search..."/>
+                            "#))
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+fn blog() -> Markup {
+        BaseHtml{ title: "Blog - AOx0", alpine: true, children: html!{ 
+            div
+                class="wrapper relative max-w-screen-md container text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100"
+                 x-data=(PreEscaped(r#"{
+                    show_item(el){
+                        return $store.search.text === '' || hasValue(el.textContent.toLowerCase(), $store.search.text.toLowerCase());
+                    }
+                }"#))
+            {
                 div class="flex flex-col space-y-10 md:space-y-0" { (h1("", html!{ "Blog" })) }
                 div class="flex flex-col gap-5" {
                     (BlogEntryNutshell { href: "./networking-notes/", title: "[WIP] Networking notes",
@@ -460,7 +480,7 @@ fn blog() -> Markup {
                     }.render())
                 }
             }
-        }, ..Default::default()}.render()
+        }, nav_bar_middle: search_bar(), ..Default::default()}.render()
 }
 
 fn welcome() -> Markup {
@@ -615,7 +635,7 @@ fn markdown(file: PathBuf, title: String) -> Markup {
 
     BaseHtml {
         title: &format!("{}{} - AOx0", &title.to_uppercase().chars().next().unwrap(), &title[1..].to_owned().replace("-", " ") ),
-        katex:true, 
+        katex: true, 
         blog: true, 
         children: html!(
             div class="max-w-screen-md relative container text-justify md:text-left v-screen mx-auto pt-6 md:py-6 px-10 text-black dark:text-gray-100" {(PreEscaped(s.to_owned()))}
